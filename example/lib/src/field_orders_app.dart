@@ -167,6 +167,18 @@ final class _FieldOrdersAppState extends State<FieldOrdersApp> {
             child: const LabHeavyViewScreen(),
           ),
         ),
+        Lm.page<void>(
+          path: '/lab/glass',
+          transition: const LmTransition.cupertino(),
+          chrome: const LmRouteChrome(
+            tabBarVisibility: LmTabBarVisibility.hidden,
+          ),
+          build: (context, params) => _withChrome(
+            title: 'iOS 26 Glass Lab',
+            canPop: true,
+            child: const LabGlassViewScreen(),
+          ),
+        ),
         _labTransitionRoute(
           path: '/lab/none',
           kind: 'none',

@@ -96,6 +96,11 @@ final class NavigationLabScreen extends StatelessWidget {
               icon: Icons.view_agenda_outlined,
               onTap: () => unawaited(router.push('/lab/heavy')),
             ),
+            _LabAction(
+              label: 'iOS 26 Glass Lab',
+              icon: Icons.auto_awesome,
+              onTap: () => unawaited(router.push('/lab/glass')),
+            ),
           ],
         ),
         const SizedBox(height: 18),
@@ -590,6 +595,266 @@ final class LabHeavyViewScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+final class LabGlassViewScreen extends StatelessWidget {
+  const LabGlassViewScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(color: Color(0xfff5f7fb)),
+      child: Stack(
+        children: [
+          Positioned.fill(child: CustomPaint(painter: _GlassBackdropPainter())),
+          ListView(
+            padding: const EdgeInsets.fromLTRB(18, 88, 18, 112),
+            children: [
+              Text(
+                'iOS 26 Glass Lab',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Visible Liquid Glass demo for bars, panels, alerts, sheets, '
+                'action sheets, and popovers.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 20),
+              LmGlassSurface(
+                variant: LmGlassSurfaceVariant.panel,
+                theme: const LmGlassThemeData.liquid(
+                  intensity: LmGlassIntensity.prominent,
+                  tintOpacity: 0.48,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Prominent panel',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'The colored content underneath stays visible through '
+                        'blur, tint, stroke, highlight, and shadow layers.',
+                      ),
+                      const SizedBox(height: 14),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          _GlassChip(label: 'Blur'),
+                          _GlassChip(label: 'Tint'),
+                          _GlassChip(label: 'Stroke'),
+                          _GlassChip(label: 'Highlight'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: LmGlassSurface(
+                      variant: LmGlassSurfaceVariant.popover,
+                      theme: const LmGlassThemeData.liquid(
+                        intensity: LmGlassIntensity.regular,
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: _GlassMetric(
+                          value: '28px',
+                          label: 'default blur',
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: LmGlassSurface(
+                      variant: LmGlassSurfaceVariant.actionSheet,
+                      theme: const LmGlassThemeData.liquid(
+                        intensity: LmGlassIntensity.prominent,
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: _GlassMetric(
+                          value: 'AA',
+                          label: 'contrast fallback',
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              _GlassModalButtons(),
+            ],
+          ),
+          Positioned(
+            left: 18,
+            right: 18,
+            bottom: 18,
+            child: LmGlassSurface(
+              variant: LmGlassSurfaceVariant.bar,
+              theme: const LmGlassThemeData.liquid(
+                intensity: LmGlassIntensity.prominent,
+                tintOpacity: 0.42,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.auto_awesome, color: Color(0xff2563eb)),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Text(
+                        'Floating glass bar',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                    FilledButton(
+                      onPressed: () => unawaited(context.lm.pop()),
+                      child: const Text('Back'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+final class _GlassModalButtons extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final router = context.lm;
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: [
+        _LabAction(
+          label: 'Glass dialog',
+          icon: Icons.crop_square,
+          onTap: () => unawaited(router.present(labModalPath('dialog'))),
+        ),
+        _LabAction(
+          label: 'Glass sheet',
+          icon: Icons.vertical_align_bottom,
+          onTap: () => unawaited(router.present(labModalPath('bottom-sheet'))),
+        ),
+        _LabAction(
+          label: 'Glass action sheet',
+          icon: Icons.ios_share,
+          onTap: () => unawaited(router.present(labModalPath('action-sheet'))),
+        ),
+        _LabAction(
+          label: 'Glass popover',
+          icon: Icons.web_asset_outlined,
+          onTap: () => unawaited(router.present(labModalPath('popover'))),
+        ),
+      ],
+    );
+  }
+}
+
+final class _GlassMetric extends StatelessWidget {
+  const _GlassMetric({required this.value, required this.label});
+
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value,
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 4),
+        Text(label),
+      ],
+    );
+  }
+}
+
+final class _GlassChip extends StatelessWidget {
+  const _GlassChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return LmGlassSurface(
+      variant: LmGlassSurfaceVariant.bar,
+      theme: const LmGlassThemeData.liquid(
+        intensity: LmGlassIntensity.subtle,
+        tintOpacity: 0.36,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+      ),
+    );
+  }
+}
+
+final class _GlassBackdropPainter extends CustomPainter {
+  const _GlassBackdropPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+    final bands = [
+      const Color(0xff2563eb),
+      const Color(0xff10b981),
+      const Color(0xffffc857),
+      const Color(0xffef4444),
+      const Color(0xff8b5cf6),
+    ];
+    final bandHeight = size.height / bands.length;
+    for (var index = 0; index < bands.length; index += 1) {
+      paint.color = bands[index].withValues(alpha: 0.32);
+      canvas.drawRect(
+        Rect.fromLTWH(0, index * bandHeight, size.width, bandHeight),
+        paint,
+      );
+    }
+    paint.color = Colors.white.withValues(alpha: 0.54);
+    for (var x = -size.height; x < size.width; x += 64) {
+      canvas.drawRect(
+        Rect.fromLTWH(
+          x.toDouble(),
+          0,
+          28,
+          size.height,
+        ).translate(size.height * 0.24, 0),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 final class _BlurredOrb extends StatelessWidget {

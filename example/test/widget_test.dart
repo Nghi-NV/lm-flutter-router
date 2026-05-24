@@ -60,6 +60,7 @@ void main() {
     expect(find.text('Replace with Fade'), findsOneWidget);
     expect(find.text('Pop current route'), findsOneWidget);
     expect(find.text('Open Heavy View'), findsOneWidget);
+    expect(find.text('iOS 26 Glass Lab'), findsOneWidget);
     expect(find.text('None'), findsOneWidget);
     expect(find.text('Fade'), findsOneWidget);
     expect(find.text('Slide left'), findsOneWidget);
@@ -284,6 +285,28 @@ void main() {
     expect(find.text('Heavy blur playlists'), findsOneWidget);
     expect(find.text('Night Route'), findsOneWidget);
     expect(find.text('Night Route 1'), findsOneWidget);
+    expect(find.byType(CupertinoTabBar), findsNothing);
+  });
+
+  testWidgets('router lab glass view exposes visible iOS 26 glass surfaces', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      const FieldOrdersApp(initialLocation: '/lab/glass'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('iOS 26 Glass Lab'), findsWidgets);
+    expect(find.text('Prominent panel'), findsOneWidget);
+    expect(find.text('Floating glass bar'), findsOneWidget);
+    expect(find.text('Glass action sheet'), findsOneWidget);
     expect(find.byType(CupertinoTabBar), findsNothing);
   });
 
