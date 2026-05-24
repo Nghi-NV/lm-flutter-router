@@ -603,155 +603,34 @@ final class LabGlassViewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
-    return DecoratedBox(
-      decoration: const BoxDecoration(color: Color(0xfff5f7fb)),
-      child: Stack(
-        children: [
-          Positioned.fill(child: CustomPaint(painter: _GlassBackdropPainter())),
-          ListView(
-            padding: EdgeInsets.fromLTRB(18, 88, 18, 156 + bottomInset),
+    return Stack(
+      children: [
+        const Positioned.fill(child: _DispatchMapScene()),
+        Positioned.fill(
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(18, 86, 18, 166 + bottomInset),
             children: [
-              Text(
-                'iOS 26 Glass Lab',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Visible Liquid Glass demo for bars, panels, alerts, sheets, '
-                'action sheets, and popovers.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 20),
-              LmGlassSurface(
-                variant: LmGlassSurfaceVariant.panel,
-                theme: const LmGlassThemeData.liquid(
-                  intensity: LmGlassIntensity.prominent,
-                  tintOpacity: 0.28,
-                  borderOpacity: 0.08,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Prominent panel',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'The colored content underneath stays visible through '
-                        'blur, tint, stroke, highlight, and shadow layers.',
-                      ),
-                      const SizedBox(height: 14),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: [
-                          _GlassChip(label: 'Blur'),
-                          _GlassChip(label: 'Tint'),
-                          _GlassChip(label: 'Stroke'),
-                          _GlassChip(label: 'Highlight'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  Expanded(
-                    child: LmGlassSurface(
-                      variant: LmGlassSurfaceVariant.popover,
-                      theme: const LmGlassThemeData.liquid(
-                        intensity: LmGlassIntensity.regular,
-                        tintOpacity: 0.24,
-                        borderOpacity: 0.08,
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: _GlassMetric(
-                          value: '28px',
-                          label: 'default blur',
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: LmGlassSurface(
-                      variant: LmGlassSurfaceVariant.actionSheet,
-                      theme: const LmGlassThemeData.liquid(
-                        intensity: LmGlassIntensity.prominent,
-                        tintOpacity: 0.26,
-                        borderOpacity: 0.08,
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: _GlassMetric(
-                          value: 'AA',
-                          label: 'contrast fallback',
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
+              const _DispatchHero(),
+              const SizedBox(height: 14),
+              const _DispatchStatusPanel(),
+              const SizedBox(height: 12),
+              const _DispatchMetricGrid(),
+              const SizedBox(height: 12),
+              const _DispatchFilterBar(),
+              const SizedBox(height: 12),
+              const _DispatchRouteCard(),
+              const SizedBox(height: 12),
               _GlassModalButtons(),
             ],
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: LmGlassSurface(
-              variant: LmGlassSurfaceVariant.bar,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(30),
-              ),
-              theme: const LmGlassThemeData.liquid(
-                intensity: LmGlassIntensity.prominent,
-                tintOpacity: 0.24,
-                borderOpacity: 0.08,
-              ),
-              child: SafeArea(
-                top: false,
-                minimum: const EdgeInsets.fromLTRB(18, 12, 18, 12),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.auto_awesome, color: Color(0xff2563eb)),
-                      const SizedBox(width: 10),
-                      const Expanded(
-                        child: Text(
-                          'Floating glass bar',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontWeight: FontWeight.w800),
-                        ),
-                      ),
-                      FilledButton(
-                        onPressed: () => unawaited(context.lm.pop()),
-                        child: const Text('Back'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+        const Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: _DispatchBottomBar(),
+        ),
+      ],
     );
   }
 }
@@ -768,25 +647,25 @@ final class _GlassModalButtons extends StatelessWidget {
       runSpacing: 10,
       children: [
         _LabAction(
-          label: 'Glass dialog',
-          icon: Icons.crop_square,
+          label: 'Reassign crew',
+          icon: Icons.manage_accounts_outlined,
           onTap: () =>
               unawaited(router.present(labModalPath('dialog', prefix))),
         ),
         _LabAction(
-          label: 'Glass sheet',
+          label: 'Stop detail',
           icon: Icons.vertical_align_bottom,
           onTap: () =>
               unawaited(router.present(labModalPath('bottom-sheet', prefix))),
         ),
         _LabAction(
-          label: 'Glass action sheet',
+          label: 'Route actions',
           icon: Icons.ios_share,
           onTap: () =>
               unawaited(router.present(labModalPath('action-sheet', prefix))),
         ),
         _LabAction(
-          label: 'Glass popover',
+          label: 'Stop preview',
           icon: Icons.web_asset_outlined,
           onTap: () =>
               unawaited(router.present(labModalPath('popover', prefix))),
@@ -796,11 +675,66 @@ final class _GlassModalButtons extends StatelessWidget {
   }
 }
 
-final class _GlassMetric extends StatelessWidget {
-  const _GlassMetric({required this.value, required this.label});
+final class _DispatchMapScene extends StatelessWidget {
+  const _DispatchMapScene();
 
-  final String value;
-  final String label;
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xffdbeafe), Color(0xfff8fafc), Color(0xffd1fae5)],
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned.fill(child: CustomPaint(painter: _DispatchMapPainter())),
+          Positioned(
+            left: 24,
+            top: 118,
+            child: _MapMarker(
+              label: 'A',
+              color: const Color(0xff2563eb),
+              offset: const Offset(0, 0),
+            ),
+          ),
+          Positioned(
+            right: 42,
+            top: 214,
+            child: _MapMarker(
+              label: 'B',
+              color: const Color(0xff059669),
+              offset: const Offset(0, 0),
+            ),
+          ),
+          Positioned(
+            left: 86,
+            bottom: 284,
+            child: _MapMarker(
+              label: 'C',
+              color: const Color(0xfff97316),
+              offset: const Offset(0, 0),
+            ),
+          ),
+          Positioned(
+            right: 72,
+            bottom: 206,
+            child: _MapMarker(
+              label: 'D',
+              color: const Color(0xffdb2777),
+              offset: const Offset(0, 0),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+final class _DispatchHero extends StatelessWidget {
+  const _DispatchHero();
 
   @override
   Widget build(BuildContext context) {
@@ -808,14 +742,257 @@ final class _GlassMetric extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          value,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900),
+          'Dispatch Command',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w900,
+            color: const Color(0xff0f172a),
+          ),
         ),
-        const SizedBox(height: 4),
-        Text(label),
+        const SizedBox(height: 6),
+        Text(
+          'Live field routing with glass controls over a real operations map.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: const Color(0xff334155),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
+    );
+  }
+}
+
+final class _DispatchStatusPanel extends StatelessWidget {
+  const _DispatchStatusPanel();
+
+  @override
+  Widget build(BuildContext context) {
+    return LmGlassSurface(
+      variant: LmGlassSurfaceVariant.panel,
+      theme: const LmGlassThemeData.liquid(
+        intensity: LmGlassIntensity.prominent,
+        tintOpacity: 0.22,
+        borderOpacity: 0.08,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.route, color: Color(0xff2563eb)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'North route is ahead of schedule',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: const Color(0xff0f172a),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              '4 crews are moving through priority stops. Glass overlays keep '
+              'the map visible while controls stay readable.',
+            ),
+            const SizedBox(height: 14),
+            const Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                _GlassChip(label: 'Live route'),
+                _GlassChip(label: 'ETA 18m'),
+                _GlassChip(label: '4 crews'),
+                _GlassChip(label: 'Priority'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+final class _DispatchMetricGrid extends StatelessWidget {
+  const _DispatchMetricGrid();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: const [
+        Expanded(
+          child: _DispatchMetricCard(
+            value: '18m',
+            label: 'next arrival',
+            icon: Icons.timer_outlined,
+          ),
+        ),
+        SizedBox(width: 12),
+        Expanded(
+          child: _DispatchMetricCard(
+            value: '94%',
+            label: 'on-time',
+            icon: Icons.verified_outlined,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+final class _DispatchMetricCard extends StatelessWidget {
+  const _DispatchMetricCard({
+    required this.value,
+    required this.label,
+    required this.icon,
+  });
+
+  final String value;
+  final String label;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return LmGlassSurface(
+      variant: LmGlassSurfaceVariant.popover,
+      theme: const LmGlassThemeData.liquid(
+        intensity: LmGlassIntensity.regular,
+        tintOpacity: 0.18,
+        borderOpacity: 0.08,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: const Color(0xff1d4ed8)),
+            const SizedBox(height: 10),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: const Color(0xff0f172a),
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(label, style: const TextStyle(color: Color(0xff334155))),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+final class _DispatchFilterBar extends StatelessWidget {
+  const _DispatchFilterBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: [
+        _GlassChip(label: 'All stops'),
+        _GlassChip(label: 'Exceptions'),
+        _GlassChip(label: 'Crew 2'),
+        _GlassChip(label: 'North zone'),
+      ],
+    );
+  }
+}
+
+final class _DispatchRouteCard extends StatelessWidget {
+  const _DispatchRouteCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return LmGlassSurface(
+      variant: LmGlassSurfaceVariant.actionSheet,
+      theme: const LmGlassThemeData.liquid(
+        intensity: LmGlassIntensity.regular,
+        tintOpacity: 0.20,
+        borderOpacity: 0.08,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            const CircleAvatar(
+              backgroundColor: Color(0xff1d4ed8),
+              foregroundColor: Colors.white,
+              child: Text('42'),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Minh Tran #1042',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xff0f172a),
+                    ),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'Powerline inspection - 2.4 km away',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Color(0xff334155)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+final class _DispatchBottomBar extends StatelessWidget {
+  const _DispatchBottomBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return LmGlassSurface(
+      variant: LmGlassSurfaceVariant.bar,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+      theme: const LmGlassThemeData.liquid(
+        intensity: LmGlassIntensity.prominent,
+        tintOpacity: 0.20,
+        borderOpacity: 0.08,
+      ),
+      child: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.fromLTRB(18, 12, 18, 12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Row(
+            children: [
+              const Icon(Icons.near_me, color: Color(0xff2563eb)),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'Live dispatch',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontWeight: FontWeight.w900),
+                ),
+              ),
+              FilledButton.icon(
+                onPressed: () => unawaited(context.lm.pop()),
+                icon: const Icon(Icons.arrow_back, size: 18),
+                label: const Text('Back'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -842,38 +1019,206 @@ final class _GlassChip extends StatelessWidget {
   }
 }
 
-final class _GlassBackdropPainter extends CustomPainter {
-  const _GlassBackdropPainter();
+final class _MapMarker extends StatelessWidget {
+  const _MapMarker({
+    required this.label,
+    required this.color,
+    required this.offset,
+  });
+
+  final String label;
+  final Color color;
+  final Offset offset;
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.translate(
+      offset: offset,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.32),
+              blurRadius: 18,
+              spreadRadius: 3,
+            ),
+          ],
+        ),
+        child: SizedBox.square(
+          dimension: 34,
+          child: Center(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+final class _DispatchMapPainter extends CustomPainter {
+  const _DispatchMapPainter();
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint();
-    final bands = [
-      const Color(0xff1d4ed8),
-      const Color(0xff059669),
-      const Color(0xfff59e0b),
-      const Color(0xffe11d48),
-      const Color(0xff7c3aed),
-    ];
-    final bandHeight = size.height / bands.length;
-    for (var index = 0; index < bands.length; index += 1) {
-      paint.color = bands[index].withValues(alpha: 0.46);
-      canvas.drawRect(
-        Rect.fromLTWH(0, index * bandHeight, size.width, bandHeight),
-        paint,
-      );
+    _paintMapBase(canvas, size);
+    _paintBlocks(canvas, size);
+    _paintRoads(canvas, size);
+    _paintRoute(canvas, size);
+    _paintZones(canvas, size);
+  }
+
+  void _paintMapBase(Canvas canvas, Size size) {
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = const Color(0xffeef6f8),
+    );
+
+    final river = Path()
+      ..moveTo(size.width * 0.72, -20)
+      ..cubicTo(
+        size.width * 0.92,
+        size.height * 0.18,
+        size.width * 0.62,
+        size.height * 0.34,
+        size.width * 0.88,
+        size.height * 0.55,
+      )
+      ..cubicTo(
+        size.width * 1.06,
+        size.height * 0.70,
+        size.width * 0.74,
+        size.height * 0.84,
+        size.width * 0.96,
+        size.height + 40,
+      )
+      ..lineTo(size.width + 80, size.height + 80)
+      ..lineTo(size.width + 80, -80)
+      ..close();
+    canvas.drawPath(
+      river,
+      Paint()..color = const Color(0xffbfdbfe).withValues(alpha: 0.48),
+    );
+  }
+
+  void _paintBlocks(Canvas canvas, Size size) {
+    final blockPaint = Paint()..color = Colors.white.withValues(alpha: 0.58);
+    final greenPaint = Paint()
+      ..color = const Color(0xff86efac).withValues(alpha: 0.32);
+    const blockWidth = 88.0;
+    const blockHeight = 54.0;
+    for (var row = 0; row < size.height / 96; row += 1) {
+      for (var col = 0; col < size.width / 118 + 1; col += 1) {
+        final x = col * 118.0 + (row.isOdd ? -34.0 : 20.0);
+        final y = row * 96.0 + 42.0;
+        final rect = RRect.fromRectAndRadius(
+          Rect.fromLTWH(x, y, blockWidth, blockHeight),
+          const Radius.circular(16),
+        );
+        canvas.drawRRect(rect, (row + col) % 5 == 0 ? greenPaint : blockPaint);
+      }
     }
-    paint.color = Colors.white.withValues(alpha: 0.28);
-    for (var x = -size.height; x < size.width; x += 64) {
-      canvas.drawRect(
-        Rect.fromLTWH(
-          x.toDouble(),
-          0,
-          24,
-          size.height,
-        ).translate(size.height * 0.24, 0),
-        paint,
+  }
+
+  void _paintRoads(Canvas canvas, Size size) {
+    final major = Paint()
+      ..color = Colors.white.withValues(alpha: 0.76)
+      ..strokeWidth = 22
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+    final minor = Paint()
+      ..color = const Color(0xffcbd5e1).withValues(alpha: 0.52)
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke;
+
+    for (var y = 96.0; y < size.height; y += 128) {
+      canvas.drawLine(Offset(-20, y), Offset(size.width + 20, y - 44), major);
+      canvas.drawLine(Offset(-20, y), Offset(size.width + 20, y - 44), minor);
+    }
+    for (var x = 42.0; x < size.width; x += 124) {
+      canvas.drawLine(Offset(x, -20), Offset(x + 72, size.height + 20), major);
+      canvas.drawLine(Offset(x, -20), Offset(x + 72, size.height + 20), minor);
+    }
+  }
+
+  void _paintRoute(Canvas canvas, Size size) {
+    final route = Path()
+      ..moveTo(size.width * 0.14, size.height * 0.19)
+      ..cubicTo(
+        size.width * 0.26,
+        size.height * 0.28,
+        size.width * 0.44,
+        size.height * 0.20,
+        size.width * 0.58,
+        size.height * 0.34,
+      )
+      ..cubicTo(
+        size.width * 0.74,
+        size.height * 0.50,
+        size.width * 0.32,
+        size.height * 0.57,
+        size.width * 0.22,
+        size.height * 0.72,
+      )
+      ..cubicTo(
+        size.width * 0.12,
+        size.height * 0.87,
+        size.width * 0.70,
+        size.height * 0.78,
+        size.width * 0.80,
+        size.height * 0.90,
       );
+
+    canvas.drawPath(
+      route,
+      Paint()
+        ..color = const Color(0xff60a5fa).withValues(alpha: 0.32)
+        ..strokeWidth = 18
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round,
+    );
+    canvas.drawPath(
+      route,
+      Paint()
+        ..color = const Color(0xff2563eb)
+        ..strokeWidth = 6
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  void _paintZones(Canvas canvas, Size size) {
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(size.width * 0.72, size.height * 0.32),
+        width: 170,
+        height: 92,
+      ),
+      Paint()..color = const Color(0xfff59e0b).withValues(alpha: 0.20),
+    );
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset(size.width * 0.32, size.height * 0.68),
+        width: 210,
+        height: 118,
+      ),
+      Paint()..color = const Color(0xffe11d48).withValues(alpha: 0.16),
+    );
+    final dotPaint = Paint()
+      ..color = const Color(0xff0f172a).withValues(alpha: 0.08);
+    for (var index = 0; index < 12; index += 1) {
+      final center = Offset(
+        (index * 73 % size.width).toDouble(),
+        180 + (index * 137 % (size.height - 220)).toDouble(),
+      );
+      canvas.drawCircle(center, 5 + (index % 3) * 2, dotPaint);
     }
   }
 
@@ -1342,9 +1687,8 @@ final class LabModalContent extends StatelessWidget {
     final router = context.lm;
     final isGlass = modalPath.startsWith('/lab/glass/modal');
     final title = isGlass
-        ? '${_glassTitleFromKind(kind)} presentation'
+        ? _glassTitleFromKind(kind)
         : '${_titleFromKind(kind)} presentation';
-    final modalPrefix = isGlass ? '/lab/glass/modal' : '/lab/modal';
 
     if (kind == 'action-sheet') {
       return SafeArea(
@@ -1363,16 +1707,10 @@ final class LabModalContent extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 isGlass
-                    ? 'Route-owned glass action sheets keep the glass page '
-                          'mounted behind a blurred popup surface.'
+                    ? 'Choose a route-level action while the live dispatch map '
+                          'stays visible behind the glass surface.'
                     : 'Route-owned action sheets dim the background and use '
                           'frosted iOS popup material.',
-                style: CupertinoTheme.of(context).textTheme.textStyle,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Modal path: $modalPath',
                 style: CupertinoTheme.of(context).textTheme.textStyle,
                 textAlign: TextAlign.center,
               ),
@@ -1403,31 +1741,20 @@ final class LabModalContent extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     isGlass
-                        ? 'Glass sheet page with a blurred full-width surface, '
-                              'safe-area ownership, and drag-to-dismiss.'
+                        ? 'Review the next service stop, customer note, and '
+                              'arrival window without leaving dispatch.'
                         : 'iOS 15 style sheet page with a top gap, rounded '
                               'surface, stacked background scale, light '
                               'barrier, and drag-to-dismiss.',
                   ),
-                  const SizedBox(height: 8),
-                  Text('Modal path: $modalPath'),
                   const SizedBox(height: 20),
                   CupertinoButton.filled(
                     onPressed: () => unawaited(router.pop()),
                     child: const Text('Dismiss'),
                   ),
-                  const SizedBox(height: 12),
-                  OutlinedButton(
-                    onPressed: () => unawaited(
-                      router.present(
-                        labModalPath('fullscreen-dialog', modalPrefix),
-                      ),
-                    ),
-                    child: const Text('Open stacked modal'),
-                  ),
                   const SizedBox(height: 16),
                   Text(
-                    'Drag down anywhere on this sheet to dismiss.',
+                    'Drag down anywhere on this sheet to return to the map.',
                     style: Theme.of(context).textTheme.bodySmall,
                     textAlign: TextAlign.center,
                   ),
@@ -1501,8 +1828,9 @@ final class _CupertinoModalPanel extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Modal path: $modalPath. Back dismisses the modal before '
-            'popping the page stack.',
+            isGlass
+                ? 'Keep route context visible while making a dispatch decision.'
+                : 'Back dismisses the modal before popping the page stack.',
             style: textStyle,
             textAlign: centered ? TextAlign.center : TextAlign.start,
           ),
@@ -1661,11 +1989,11 @@ String _titleFromKind(String kind) {
 
 String _glassTitleFromKind(String kind) {
   return switch (kind) {
-    'dialog' => 'Glass dialog',
-    'bottom-sheet' => 'Glass sheet',
-    'action-sheet' => 'Glass action sheet',
-    'fullscreen-dialog' => 'Glass fullscreen dialog',
-    'popover' => 'Glass popover',
+    'dialog' => 'Reassign crew',
+    'bottom-sheet' => 'Stop detail',
+    'action-sheet' => 'Route actions',
+    'fullscreen-dialog' => 'Escalate stop',
+    'popover' => 'Stop preview',
     _ => 'Glass ${_titleFromKind(kind)}',
   };
 }

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lm_flutter_router/lm_flutter_router.dart';
 import 'package:lm_flutter_router_example/src/field_orders_app.dart';
 
 void main() {
@@ -303,11 +304,53 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('iOS 26 Glass Lab'), findsWidgets);
-    expect(find.text('Prominent panel'), findsOneWidget);
-    expect(find.text('Floating glass bar'), findsOneWidget);
-    expect(find.text('Glass action sheet'), findsOneWidget);
+    expect(find.text('Dispatch Command'), findsOneWidget);
+    expect(find.text('North route is ahead of schedule'), findsOneWidget);
+    expect(find.text('18m'), findsOneWidget);
+    expect(find.text('94%'), findsOneWidget);
+    expect(find.text('Live dispatch'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Route actions'),
+      320,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Route actions'), findsOneWidget);
+    expect(find.byType(LmGlassSurface), findsAtLeastNWidgets(8));
     expect(find.byType(CupertinoTabBar), findsNothing);
+  });
+
+  testWidgets('router lab glass view uses realistic product content', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      const FieldOrdersApp(initialLocation: '/lab/glass'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dispatch Command'), findsOneWidget);
+    expect(find.text('Live route'), findsOneWidget);
+    expect(find.text('ETA 18m'), findsOneWidget);
+    expect(find.text('4 crews'), findsOneWidget);
+    expect(find.text('Priority'), findsOneWidget);
+    expect(find.text('All stops'), findsOneWidget);
+    expect(find.text('Exceptions'), findsOneWidget);
+    expect(find.text('Crew 2'), findsOneWidget);
+    expect(find.text('North zone'), findsOneWidget);
+    expect(find.text('Minh Tran #1042'), findsOneWidget);
+    expect(find.text('Powerline inspection - 2.4 km away'), findsOneWidget);
+    expect(find.text('Prominent panel'), findsNothing);
+    expect(find.text('Blur'), findsNothing);
+    expect(find.text('Tint'), findsNothing);
+    expect(find.text('Stroke'), findsNothing);
+    expect(find.text('Highlight'), findsNothing);
   });
 
   testWidgets('router lab glass view is reachable from the Lab tab', (
@@ -328,8 +371,8 @@ void main() {
     await tester.tap(find.text('iOS 26 Glass Lab'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Prominent panel'), findsOneWidget);
-    expect(find.text('Floating glass bar'), findsOneWidget);
+    expect(find.text('Dispatch Command'), findsOneWidget);
+    expect(find.text('Live dispatch'), findsOneWidget);
     expect(find.byType(CupertinoTabBar), findsNothing);
   });
 
@@ -348,18 +391,18 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final glassSheet = find.widgetWithText(ActionChip, 'Glass sheet');
-    await tester.ensureVisible(glassSheet);
+    await tester.scrollUntilVisible(
+      find.text('Stop detail'),
+      320,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
-    await tester.tap(glassSheet);
+    await tester.tap(find.widgetWithText(ActionChip, 'Stop detail'));
     await _pumpModalTransition(tester);
 
-    expect(find.text('Glass sheet presentation'), findsOneWidget);
-    expect(
-      find.textContaining('/lab/glass/modal/bottom-sheet'),
-      findsOneWidget,
-    );
-    expect(find.text('Prominent panel'), findsOneWidget);
+    expect(find.text('Stop detail'), findsWidgets);
+    expect(find.textContaining('Review the next service stop'), findsOneWidget);
+    expect(find.text('Live dispatch'), findsOneWidget);
     expect(find.text('Router Lab').hitTestable(), findsNothing);
 
     await tester.tap(
@@ -367,8 +410,8 @@ void main() {
     );
     await _pumpModalTransition(tester);
 
-    expect(find.text('Glass sheet presentation'), findsNothing);
-    expect(find.text('Prominent panel'), findsOneWidget);
+    expect(find.textContaining('Review the next service stop'), findsNothing);
+    expect(find.text('Live dispatch'), findsOneWidget);
   });
 
   testWidgets('glass lab modals work from the real tab navigation flow', (
@@ -389,35 +432,25 @@ void main() {
     await tester.tap(find.text('iOS 26 Glass Lab'));
     await tester.pumpAndSettle();
 
-    final cases = <(String, String, String)>[
-      ('Glass dialog', 'Glass dialog presentation', '/lab/glass/modal/dialog'),
-      (
-        'Glass sheet',
-        'Glass sheet presentation',
-        '/lab/glass/modal/bottom-sheet',
-      ),
-      (
-        'Glass action sheet',
-        'Glass action sheet presentation',
-        '/lab/glass/modal/action-sheet',
-      ),
-      (
-        'Glass popover',
-        'Glass popover presentation',
-        '/lab/glass/modal/popover',
-      ),
+    final cases = <(String, String)>[
+      ('Reassign crew', 'Reassign crew'),
+      ('Stop detail', 'Stop detail'),
+      ('Route actions', 'Route actions'),
+      ('Stop preview', 'Stop preview'),
     ];
 
-    for (final (button, title, path) in cases) {
-      final chip = find.widgetWithText(ActionChip, button);
-      await tester.ensureVisible(chip);
+    for (final (button, title) in cases) {
+      await tester.scrollUntilVisible(
+        find.text(button),
+        320,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.pumpAndSettle();
-      await tester.tap(chip);
+      await tester.tap(find.widgetWithText(ActionChip, button));
       await _pumpModalTransition(tester);
 
-      expect(find.text(title), findsOneWidget);
-      expect(find.textContaining(path), findsOneWidget);
-      expect(find.text('Prominent panel'), findsOneWidget);
+      expect(find.text(title), findsWidgets);
+      expect(find.text('Live dispatch'), findsOneWidget);
       expect(find.text('Router Lab').hitTestable(), findsNothing);
       expect(find.text('Push Cupertino').hitTestable(), findsNothing);
       expect(tester.takeException(), isNull);
@@ -425,9 +458,85 @@ void main() {
       await tester.binding.handlePopRoute();
       await _pumpModalTransition(tester);
 
-      expect(find.text(title), findsNothing);
-      expect(find.text('Prominent panel'), findsOneWidget);
+      expect(find.text(title).hitTestable(), findsOneWidget);
+      expect(find.text('Live dispatch'), findsOneWidget);
       expect(tester.takeException(), isNull);
+    }
+  });
+
+  testWidgets('glass route surfaces cover panel metrics chips modals and bar', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      const FieldOrdersApp(initialLocation: '/lab/glass'),
+    );
+    await tester.pumpAndSettle();
+
+    final variants = tester
+        .widgetList<LmGlassSurface>(find.byType(LmGlassSurface))
+        .map((surface) => surface.variant)
+        .toSet();
+    expect(variants, contains(LmGlassSurfaceVariant.panel));
+    expect(variants, contains(LmGlassSurfaceVariant.popover));
+    expect(variants, contains(LmGlassSurfaceVariant.actionSheet));
+    expect(variants, contains(LmGlassSurfaceVariant.bar));
+
+    await tester.scrollUntilVisible(
+      find.text('Reassign crew'),
+      320,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ActionChip, 'Reassign crew'));
+    await _pumpModalTransition(tester);
+
+    final modalVariants = tester
+        .widgetList<LmGlassSurface>(find.byType(LmGlassSurface))
+        .map((surface) => surface.variant)
+        .toSet();
+    expect(modalVariants, contains(LmGlassSurfaceVariant.alert));
+    expect(find.text('Live dispatch'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('glass direct modal deep links preserve dispatch background', (
+    tester,
+  ) async {
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+
+    const cases = <(String, String)>[
+      ('/lab/glass/modal/dialog', 'Reassign crew'),
+      ('/lab/glass/modal/bottom-sheet', 'Stop detail'),
+      ('/lab/glass/modal/action-sheet', 'Route actions'),
+      ('/lab/glass/modal/popover', 'Stop preview'),
+    ];
+
+    for (final (path, title) in cases) {
+      await tester.pumpWidget(
+        FieldOrdersApp(key: ValueKey(path), initialLocation: path),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text(title), findsWidgets);
+      expect(find.text('Dispatch Command'), findsOneWidget);
+      expect(find.text('Live dispatch'), findsOneWidget);
+      expect(find.text('Router Lab').hitTestable(), findsNothing);
+      expect(tester.takeException(), isNull);
+
+      await tester.binding.handlePopRoute();
+      await _pumpModalTransition(tester);
     }
   });
 
@@ -453,8 +562,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('Prominent panel'), findsOneWidget);
-    expect(find.text('Floating glass bar').hitTestable(), findsOneWidget);
+    expect(find.text('North route is ahead of schedule'), findsOneWidget);
+    expect(find.text('Live dispatch').hitTestable(), findsOneWidget);
     expect(find.text('Back').hitTestable(), findsOneWidget);
   });
 
@@ -471,6 +580,7 @@ void main() {
       Size(390, 844),
       Size(768, 1024),
       Size(1024, 768),
+      Size(1200, 800),
     ];
 
     for (final size in sizes) {
@@ -483,29 +593,86 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.scrollUntilVisible(
-        find.text('Glass sheet'),
+        find.text('Stop detail'),
         320,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Glass sheet'));
+      await tester.tap(find.text('Stop detail'));
       await _pumpModalTransition(tester);
 
-      final sheetTitle = find.text('Glass sheet presentation');
+      final sheetTitle = find.text('Stop detail').hitTestable();
       expect(sheetTitle, findsOneWidget);
       final titleRect = tester.getRect(sheetTitle);
       expect(titleRect.left, greaterThanOrEqualTo(0));
       expect(titleRect.right, lessThanOrEqualTo(size.width));
       expect(titleRect.top, greaterThanOrEqualTo(0));
       expect(titleRect.bottom, lessThanOrEqualTo(size.height));
-      expect(find.text('Prominent panel'), findsOneWidget);
+      expect(find.text('Live dispatch'), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       await tester.binding.handlePopRoute();
       await _pumpModalTransition(tester);
 
-      expect(find.text('Glass sheet presentation'), findsNothing);
+      expect(find.textContaining('Review the next service stop'), findsNothing);
       expect(tester.takeException(), isNull);
+    }
+  });
+
+  testWidgets('glass modals fit compact portrait tablet and wide viewports', (
+    tester,
+  ) async {
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    const sizes = <Size>[
+      Size(320, 568),
+      Size(390, 844),
+      Size(768, 1024),
+      Size(1024, 768),
+      Size(1200, 800),
+    ];
+    const cases = <(String, String)>[
+      ('Reassign crew', 'Reassign crew'),
+      ('Stop detail', 'Stop detail'),
+      ('Route actions', 'Route actions'),
+      ('Stop preview', 'Stop preview'),
+    ];
+
+    for (final size in sizes) {
+      for (final (button, title) in cases) {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1;
+
+        await tester.pumpWidget(
+          const FieldOrdersApp(initialLocation: '/lab/glass'),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.scrollUntilVisible(
+          find.text(button),
+          320,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(button));
+        await _pumpModalTransition(tester);
+
+        final titleFinder = find.text(title).hitTestable();
+        expect(titleFinder, findsWidgets);
+        final titleRect = tester.getRect(titleFinder.first);
+        expect(titleRect.left, greaterThanOrEqualTo(0));
+        expect(titleRect.right, lessThanOrEqualTo(size.width));
+        expect(titleRect.top, greaterThanOrEqualTo(0));
+        expect(titleRect.bottom, lessThanOrEqualTo(size.height));
+        expect(find.text('Dismiss').hitTestable(), findsWidgets);
+        expect(tester.takeException(), isNull);
+
+        await tester.binding.handlePopRoute();
+        await _pumpModalTransition(tester);
+      }
     }
   });
 
