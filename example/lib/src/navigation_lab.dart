@@ -628,7 +628,8 @@ final class LabGlassViewScreen extends StatelessWidget {
                 variant: LmGlassSurfaceVariant.panel,
                 theme: const LmGlassThemeData.liquid(
                   intensity: LmGlassIntensity.prominent,
-                  tintOpacity: 0.48,
+                  tintOpacity: 0.28,
+                  borderOpacity: 0.08,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(18),
@@ -669,6 +670,8 @@ final class LabGlassViewScreen extends StatelessWidget {
                       variant: LmGlassSurfaceVariant.popover,
                       theme: const LmGlassThemeData.liquid(
                         intensity: LmGlassIntensity.regular,
+                        tintOpacity: 0.24,
+                        borderOpacity: 0.08,
                       ),
                       child: const Padding(
                         padding: EdgeInsets.all(16),
@@ -685,6 +688,8 @@ final class LabGlassViewScreen extends StatelessWidget {
                       variant: LmGlassSurfaceVariant.actionSheet,
                       theme: const LmGlassThemeData.liquid(
                         intensity: LmGlassIntensity.prominent,
+                        tintOpacity: 0.26,
+                        borderOpacity: 0.08,
                       ),
                       child: const Padding(
                         padding: EdgeInsets.all(16),
@@ -707,49 +712,39 @@ final class LabGlassViewScreen extends StatelessWidget {
             bottom: 0,
             child: LmGlassSurface(
               variant: LmGlassSurfaceVariant.bar,
-              borderRadius: BorderRadius.zero,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(30),
+              ),
               theme: const LmGlassThemeData.liquid(
                 intensity: LmGlassIntensity.prominent,
-                tintOpacity: 0.42,
+                tintOpacity: 0.24,
+                borderOpacity: 0.08,
               ),
-              child: LmGlassSurface(
-                variant: LmGlassSurfaceVariant.bar,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(26),
-                ),
-                theme: const LmGlassThemeData.liquid(
-                  intensity: LmGlassIntensity.prominent,
-                  tintOpacity: 0.32,
-                ),
-                child: SafeArea(
-                  top: false,
-                  minimum: const EdgeInsets.fromLTRB(18, 10, 18, 12),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.auto_awesome,
-                          color: Color(0xff2563eb),
+              child: SafeArea(
+                top: false,
+                minimum: const EdgeInsets.fromLTRB(18, 12, 18, 12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.auto_awesome, color: Color(0xff2563eb)),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Text(
+                          'Floating glass bar',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontWeight: FontWeight.w800),
                         ),
-                        const SizedBox(width: 10),
-                        const Expanded(
-                          child: Text(
-                            'Floating glass bar',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                        ),
-                        FilledButton(
-                          onPressed: () => unawaited(context.lm.pop()),
-                          child: const Text('Back'),
-                        ),
-                      ],
-                    ),
+                      ),
+                      FilledButton(
+                        onPressed: () => unawaited(context.lm.pop()),
+                        child: const Text('Back'),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -836,7 +831,8 @@ final class _GlassChip extends StatelessWidget {
       variant: LmGlassSurfaceVariant.bar,
       theme: const LmGlassThemeData.liquid(
         intensity: LmGlassIntensity.subtle,
-        tintOpacity: 0.36,
+        tintOpacity: 0.20,
+        borderOpacity: 0.10,
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -853,27 +849,27 @@ final class _GlassBackdropPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint();
     final bands = [
-      const Color(0xff2563eb),
-      const Color(0xff10b981),
-      const Color(0xffffc857),
-      const Color(0xffef4444),
-      const Color(0xff8b5cf6),
+      const Color(0xff1d4ed8),
+      const Color(0xff059669),
+      const Color(0xfff59e0b),
+      const Color(0xffe11d48),
+      const Color(0xff7c3aed),
     ];
     final bandHeight = size.height / bands.length;
     for (var index = 0; index < bands.length; index += 1) {
-      paint.color = bands[index].withValues(alpha: 0.32);
+      paint.color = bands[index].withValues(alpha: 0.46);
       canvas.drawRect(
         Rect.fromLTWH(0, index * bandHeight, size.width, bandHeight),
         paint,
       );
     }
-    paint.color = Colors.white.withValues(alpha: 0.54);
+    paint.color = Colors.white.withValues(alpha: 0.28);
     for (var x = -size.height; x < size.width; x += 64) {
       canvas.drawRect(
         Rect.fromLTWH(
           x.toDouble(),
           0,
-          28,
+          24,
           size.height,
         ).translate(size.height * 0.24, 0),
         paint,

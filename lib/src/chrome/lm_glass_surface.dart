@@ -28,10 +28,10 @@ final class LmGlassThemeData {
   const LmGlassThemeData.liquid({
     this.enabled = true,
     this.intensity = LmGlassIntensity.regular,
-    this.blurSigma = 28,
-    this.tintOpacity = 0.56,
-    this.borderOpacity = 0.34,
-    this.highlightOpacity = 0.18,
+    this.blurSigma = 24,
+    this.tintOpacity = 0.30,
+    this.borderOpacity = 0.12,
+    this.highlightOpacity = 0.34,
   });
 
   const LmGlassThemeData.classic()
@@ -119,11 +119,7 @@ final class LmGlassSurface extends StatelessWidget {
         : dark
         ? Colors.black
         : Colors.white;
-    final strokeBase = highContrast
-        ? scheme.onSurface
-        : dark
-        ? Colors.white
-        : Colors.black;
+    final strokeBase = highContrast ? scheme.onSurface : Colors.white;
     final tintOpacity = highContrast ? 1.0 : _tintOpacityFor(variant);
     final borderOpacity = highContrast ? 0.62 : theme.borderOpacity;
     return BoxDecoration(
@@ -136,8 +132,10 @@ final class LmGlassSurface extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: [
                 Colors.white.withValues(alpha: theme.highlightOpacity),
+                Colors.white.withValues(alpha: theme.highlightOpacity * 0.22),
                 tintBase.withValues(alpha: 0),
               ],
+              stops: const [0, 0.48, 1],
             ),
     );
   }
@@ -157,9 +155,9 @@ final class LmGlassSurface extends StatelessWidget {
       borderRadius: borderRadius ?? _radiusFor(variant),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withValues(alpha: dark ? 0.22 : 0.10),
+          color: Colors.black.withValues(alpha: dark ? 0.20 : 0.13),
           blurRadius: _shadowBlurFor(variant),
-          offset: const Offset(0, 10),
+          offset: const Offset(0, 14),
         ),
       ],
     );
@@ -169,12 +167,12 @@ final class LmGlassSurface extends StatelessWidget {
     final base = theme.tintOpacity;
     return switch (variant) {
       LmGlassSurfaceVariant.bar => base * 0.82,
-      LmGlassSurfaceVariant.sidebar => base * 0.9,
-      LmGlassSurfaceVariant.panel => base,
-      LmGlassSurfaceVariant.alert => base * 1.12,
-      LmGlassSurfaceVariant.sheet => base * 1.08,
-      LmGlassSurfaceVariant.actionSheet => base,
-      LmGlassSurfaceVariant.popover => base * 1.04,
+      LmGlassSurfaceVariant.sidebar => base * 0.88,
+      LmGlassSurfaceVariant.panel => base * 0.86,
+      LmGlassSurfaceVariant.alert => base * 0.96,
+      LmGlassSurfaceVariant.sheet => base * 0.94,
+      LmGlassSurfaceVariant.actionSheet => base * 0.88,
+      LmGlassSurfaceVariant.popover => base * 0.86,
     }.clamp(0.0, 1.0);
   }
 
