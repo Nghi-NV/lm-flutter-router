@@ -340,12 +340,20 @@ void main() {
     expect(find.text('ETA 18m'), findsOneWidget);
     expect(find.text('4 crews'), findsOneWidget);
     expect(find.text('Priority'), findsOneWidget);
+    expect(find.text('Minh Tran #1042'), findsOneWidget);
+    expect(find.text('Powerline inspection - 2.4 km away'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('All stops'),
+      220,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
     expect(find.text('All stops'), findsOneWidget);
     expect(find.text('Exceptions'), findsOneWidget);
     expect(find.text('Crew 2'), findsOneWidget);
     expect(find.text('North zone'), findsOneWidget);
-    expect(find.text('Minh Tran #1042'), findsOneWidget);
-    expect(find.text('Powerline inspection - 2.4 km away'), findsOneWidget);
     expect(find.text('Prominent panel'), findsNothing);
     expect(find.text('Blur'), findsNothing);
     expect(find.text('Tint'), findsNothing);

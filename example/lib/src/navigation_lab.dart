@@ -608,17 +608,17 @@ final class LabGlassViewScreen extends StatelessWidget {
         const Positioned.fill(child: _DispatchMapScene()),
         Positioned.fill(
           child: ListView(
-            padding: EdgeInsets.fromLTRB(18, 86, 18, 166 + bottomInset),
+            padding: EdgeInsets.fromLTRB(18, 74, 18, 142 + bottomInset),
             children: [
               const _DispatchHero(),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
+              const _DispatchRouteCard(),
+              const SizedBox(height: 12),
               const _DispatchStatusPanel(),
               const SizedBox(height: 12),
               const _DispatchMetricGrid(),
               const SizedBox(height: 12),
               const _DispatchFilterBar(),
-              const SizedBox(height: 12),
-              const _DispatchRouteCard(),
               const SizedBox(height: 12),
               _GlassModalButtons(),
             ],
@@ -691,38 +691,50 @@ final class _DispatchMapScene extends StatelessWidget {
       child: Stack(
         children: [
           Positioned.fill(child: CustomPaint(painter: _DispatchMapPainter())),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white.withValues(alpha: 0.64),
+                    Colors.white.withValues(alpha: 0.38),
+                    Colors.white.withValues(alpha: 0.24),
+                  ],
+                  stops: const [0, 0.42, 1],
+                ),
+              ),
+            ),
+          ),
           Positioned(
-            left: 24,
-            top: 118,
+            left: 22,
+            top: 252,
             child: _MapMarker(
-              label: 'A',
               color: const Color(0xff2563eb),
               offset: const Offset(0, 0),
             ),
           ),
           Positioned(
-            right: 42,
-            top: 214,
+            right: 36,
+            top: 356,
             child: _MapMarker(
-              label: 'B',
               color: const Color(0xff059669),
               offset: const Offset(0, 0),
             ),
           ),
           Positioned(
-            left: 86,
-            bottom: 284,
+            left: 78,
+            bottom: 330,
             child: _MapMarker(
-              label: 'C',
               color: const Color(0xfff97316),
               offset: const Offset(0, 0),
             ),
           ),
           Positioned(
-            right: 72,
-            bottom: 206,
+            right: 78,
+            bottom: 288,
             child: _MapMarker(
-              label: 'D',
               color: const Color(0xffdb2777),
               offset: const Offset(0, 0),
             ),
@@ -738,25 +750,36 @@ final class _DispatchHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Dispatch Command',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w900,
-            color: const Color(0xff0f172a),
-          ),
+    return LmGlassSurface(
+      variant: LmGlassSurfaceVariant.popover,
+      theme: const LmGlassThemeData.liquid(
+        intensity: LmGlassIntensity.subtle,
+        tintOpacity: 0.28,
+        borderOpacity: 0.06,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Dispatch Command',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: const Color(0xff0f172a),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Live field routing with glass controls over a real operations map.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: const Color(0xff334155),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 6),
-        Text(
-          'Live field routing with glass controls over a real operations map.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: const Color(0xff334155),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -770,11 +793,11 @@ final class _DispatchStatusPanel extends StatelessWidget {
       variant: LmGlassSurfaceVariant.panel,
       theme: const LmGlassThemeData.liquid(
         intensity: LmGlassIntensity.prominent,
-        tintOpacity: 0.22,
+        tintOpacity: 0.34,
         borderOpacity: 0.08,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -793,12 +816,11 @@ final class _DispatchStatusPanel extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             const Text(
-              '4 crews are moving through priority stops. Glass overlays keep '
-              'the map visible while controls stay readable.',
+              '4 crews are moving through priority stops while controls stay readable above the map.',
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             const Wrap(
               spacing: 10,
               runSpacing: 10,
@@ -860,7 +882,7 @@ final class _DispatchMetricCard extends StatelessWidget {
       variant: LmGlassSurfaceVariant.popover,
       theme: const LmGlassThemeData.liquid(
         intensity: LmGlassIntensity.regular,
-        tintOpacity: 0.18,
+        tintOpacity: 0.30,
         borderOpacity: 0.08,
       ),
       child: Padding(
@@ -913,7 +935,7 @@ final class _DispatchRouteCard extends StatelessWidget {
       variant: LmGlassSurfaceVariant.actionSheet,
       theme: const LmGlassThemeData.liquid(
         intensity: LmGlassIntensity.regular,
-        tintOpacity: 0.20,
+        tintOpacity: 0.32,
         borderOpacity: 0.08,
       ),
       child: Padding(
@@ -964,7 +986,7 @@ final class _DispatchBottomBar extends StatelessWidget {
       borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
       theme: const LmGlassThemeData.liquid(
         intensity: LmGlassIntensity.prominent,
-        tintOpacity: 0.20,
+        tintOpacity: 0.30,
         borderOpacity: 0.08,
       ),
       child: SafeArea(
@@ -1008,7 +1030,7 @@ final class _GlassChip extends StatelessWidget {
       variant: LmGlassSurfaceVariant.bar,
       theme: const LmGlassThemeData.liquid(
         intensity: LmGlassIntensity.subtle,
-        tintOpacity: 0.20,
+        tintOpacity: 0.26,
         borderOpacity: 0.10,
       ),
       child: Padding(
@@ -1020,13 +1042,8 @@ final class _GlassChip extends StatelessWidget {
 }
 
 final class _MapMarker extends StatelessWidget {
-  const _MapMarker({
-    required this.label,
-    required this.color,
-    required this.offset,
-  });
+  const _MapMarker({required this.color, required this.offset});
 
-  final String label;
   final Color color;
   final Offset offset;
 
@@ -1036,24 +1053,26 @@ final class _MapMarker extends StatelessWidget {
       offset: offset,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: color,
+          color: color.withValues(alpha: 0.92),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: color.withValues(alpha: 0.32),
-              blurRadius: 18,
-              spreadRadius: 3,
+              color: color.withValues(alpha: 0.16),
+              blurRadius: 12,
+              spreadRadius: 1,
             ),
           ],
         ),
         child: SizedBox.square(
-          dimension: 34,
+          dimension: 18,
           child: Center(
-            child: Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w900,
+            child: SizedBox.square(
+              dimension: 6,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.86),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
           ),
@@ -1104,14 +1123,14 @@ final class _DispatchMapPainter extends CustomPainter {
       ..close();
     canvas.drawPath(
       river,
-      Paint()..color = const Color(0xffbfdbfe).withValues(alpha: 0.48),
+      Paint()..color = const Color(0xffbfdbfe).withValues(alpha: 0.24),
     );
   }
 
   void _paintBlocks(Canvas canvas, Size size) {
-    final blockPaint = Paint()..color = Colors.white.withValues(alpha: 0.58);
+    final blockPaint = Paint()..color = Colors.white.withValues(alpha: 0.36);
     final greenPaint = Paint()
-      ..color = const Color(0xff86efac).withValues(alpha: 0.32);
+      ..color = const Color(0xff86efac).withValues(alpha: 0.16);
     const blockWidth = 88.0;
     const blockHeight = 54.0;
     for (var row = 0; row < size.height / 96; row += 1) {
@@ -1129,13 +1148,13 @@ final class _DispatchMapPainter extends CustomPainter {
 
   void _paintRoads(Canvas canvas, Size size) {
     final major = Paint()
-      ..color = Colors.white.withValues(alpha: 0.76)
-      ..strokeWidth = 22
+      ..color = Colors.white.withValues(alpha: 0.42)
+      ..strokeWidth = 16
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
     final minor = Paint()
-      ..color = const Color(0xffcbd5e1).withValues(alpha: 0.52)
-      ..strokeWidth = 3
+      ..color = const Color(0xffcbd5e1).withValues(alpha: 0.25)
+      ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
     for (var y = 96.0; y < size.height; y += 128) {
@@ -1179,16 +1198,16 @@ final class _DispatchMapPainter extends CustomPainter {
     canvas.drawPath(
       route,
       Paint()
-        ..color = const Color(0xff60a5fa).withValues(alpha: 0.32)
-        ..strokeWidth = 18
+        ..color = const Color(0xff60a5fa).withValues(alpha: 0.16)
+        ..strokeWidth = 14
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round,
     );
     canvas.drawPath(
       route,
       Paint()
-        ..color = const Color(0xff2563eb)
-        ..strokeWidth = 6
+        ..color = const Color(0xff2563eb).withValues(alpha: 0.70)
+        ..strokeWidth = 4
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round,
     );
@@ -1201,7 +1220,7 @@ final class _DispatchMapPainter extends CustomPainter {
         width: 170,
         height: 92,
       ),
-      Paint()..color = const Color(0xfff59e0b).withValues(alpha: 0.20),
+      Paint()..color = const Color(0xfff59e0b).withValues(alpha: 0.10),
     );
     canvas.drawOval(
       Rect.fromCenter(
@@ -1209,10 +1228,10 @@ final class _DispatchMapPainter extends CustomPainter {
         width: 210,
         height: 118,
       ),
-      Paint()..color = const Color(0xffe11d48).withValues(alpha: 0.16),
+      Paint()..color = const Color(0xffe11d48).withValues(alpha: 0.08),
     );
     final dotPaint = Paint()
-      ..color = const Color(0xff0f172a).withValues(alpha: 0.08);
+      ..color = const Color(0xff0f172a).withValues(alpha: 0.04);
     for (var index = 0; index < 12; index += 1) {
       final center = Offset(
         (index * 73 % size.width).toDouble(),
