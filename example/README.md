@@ -10,6 +10,8 @@ This example is a small dispatcher app built with `lm_flutter_router`.
 - Bottom tabs on mobile and side menu on tablet.
 - `LmAdaptiveChromeScaffold` demo with custom compact bottom tabs and custom
   tablet sidebar.
+- iOS 26-style `LmGlassSurface` chrome for tabs, sidebars, sheets, popovers,
+  action sheets, and dialogs.
 - Android, iOS, web, and desktop use the same iOS-style transition policy in
   this example.
 - Mobile tabs use `CupertinoTabBar`; order actions use `CupertinoActionSheet`.

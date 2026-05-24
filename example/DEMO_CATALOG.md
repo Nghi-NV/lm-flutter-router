@@ -156,11 +156,21 @@ LmAdaptiveRouterSplitView(
 LmAdaptiveChromeScaffold(
   router: router,
   sidebarOnMedium: true,
+  glass: const LmGlassThemeData.liquid(),
   bottomBarBuilder: (context, router) => FieldOrdersBottomTabs(router: router),
   sidebarBuilder: (context, router) => FieldOrdersSidebar(router: router),
   mediumContentBuilder: (context, child) => FieldOrdersTabletFrame(child),
   expandedContentBuilder: (context, child) => FieldOrdersTabletFrame(child),
   child: child,
+);
+```
+
+### iOS 26 Liquid Glass Surface
+
+```dart
+LmGlassSurface(
+  variant: LmGlassSurfaceVariant.actionSheet,
+  child: OrderActionsSheet(orderId: orderId),
 );
 ```
 

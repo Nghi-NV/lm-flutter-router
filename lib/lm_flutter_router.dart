@@ -9,6 +9,7 @@ export 'src/chrome/lm_chrome_scaffold.dart';
 export 'src/chrome/lm_adaptive_chrome_scaffold.dart';
 export 'src/chrome/lm_navigation_bar.dart';
 export 'src/chrome/lm_route_chrome.dart';
+export 'src/chrome/lm_glass_surface.dart';
 export 'src/core/lm_location.dart';
 export 'src/core/lm.dart';
 export 'src/core/lm_route_definition.dart';

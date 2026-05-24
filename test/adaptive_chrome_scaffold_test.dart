@@ -135,6 +135,67 @@ void main() {
     expect(find.text('Custom tablet header'), findsOneWidget);
     expect(find.text('Body'), findsOneWidget);
   });
+
+  testWidgets('LmAdaptiveChromeScaffold can glass-wrap custom bottom chrome', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final router = _router();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LmAdaptiveChromeScaffold(
+          router: router,
+          glass: const LmGlassThemeData.liquid(),
+          bottomBarBuilder: (context, router) => const SizedBox(
+            key: ValueKey('bottom-bar'),
+            height: 64,
+            child: Text('Bottom tabs'),
+          ),
+          child: const Text('Body'),
+        ),
+      ),
+    );
+
+    expect(find.byType(LmGlassSurface), findsOneWidget);
+    expect(find.byKey(const ValueKey('bottom-bar')), findsOneWidget);
+  });
+
+  testWidgets('LmAdaptiveChromeScaffold can glass-wrap custom sidebar chrome', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1024, 768);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final router = _router();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LmAdaptiveChromeScaffold(
+          router: router,
+          glass: const LmGlassThemeData.liquid(),
+          sidebarBuilder: (context, router) => const SizedBox(
+            key: ValueKey('sidebar'),
+            child: Text('Tablet sidebar'),
+          ),
+          child: const Text('Body'),
+        ),
+      ),
+    );
+
+    expect(find.byType(LmGlassSurface), findsOneWidget);
+    expect(find.byKey(const ValueKey('sidebar')), findsOneWidget);
+  });
 }
 
 LmRouter _router() {

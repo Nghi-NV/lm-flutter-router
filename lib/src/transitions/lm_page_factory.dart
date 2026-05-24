@@ -1,9 +1,10 @@
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter, lerpDouble;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../chrome/lm_glass_surface.dart';
 import '../modal/lm_modal_presentation.dart';
 import 'lm_cupertino_sheet_content_page.dart';
 import 'lm_horizontal_back_gesture.dart';
@@ -720,10 +721,7 @@ final class _LmPopupModalRoute<T> extends PageRoute<T> {
       final surface = _CupertinoActionSheetSurface(child: child);
       final aligned = Align(
         alignment: Alignment.bottomCenter,
-        child: _cupertinoActionSheetViewport(
-          context: context,
-          child: surface,
-        ),
+        child: _cupertinoActionSheetViewport(context: context, child: surface),
       );
       if (!presentation.usesSafeArea) {
         return aligned;
@@ -1262,27 +1260,24 @@ final class _CupertinoModalSheetSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = CupertinoDynamicColor.resolve(
-      CupertinoColors.systemBackground,
-      context,
+    final surface = LmGlassSurface(
+      variant: LmGlassSurfaceVariant.sheet,
+      borderRadius: fullscreen
+          ? BorderRadius.zero
+          : const BorderRadius.vertical(
+              top: Radius.circular(_cupertinoSheetCornerRadius),
+            ),
+      child: child,
     );
-    final surface = ColoredBox(color: color, child: child);
     if (fullscreen) {
       return surface;
     }
-    final clipped = ClipRRect(
-      borderRadius: const BorderRadius.vertical(
-        top: Radius.circular(_cupertinoSheetCornerRadius),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: surface,
-    );
     if (!showGrabber) {
-      return clipped;
+      return surface;
     }
     return Stack(
       children: [
-        clipped,
+        surface,
         PositionedDirectional(
           top: 8,
           start: 0,
@@ -1314,7 +1309,21 @@ final class _CupertinoPopupMaterialSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPopupSurface(child: child);
+    return CupertinoPopupSurface(
+      child: LmGlassSurface(
+        variant: LmGlassSurfaceVariant.alert,
+        theme: const LmGlassThemeData(
+          enabled: false,
+          intensity: LmGlassIntensity.regular,
+          blurSigma: 0,
+          tintOpacity: 0,
+          borderOpacity: 0.18,
+          highlightOpacity: 0.10,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        child: child,
+      ),
+    );
   }
 }
 
@@ -1325,24 +1334,10 @@ final class _CupertinoPopoverSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
+    return LmGlassSurface(
+      variant: LmGlassSurfaceVariant.popover,
       borderRadius: BorderRadius.circular(_cupertinoActionSheetCornerRadius),
-      clipBehavior: Clip.antiAlias,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: CupertinoPopupSurface.defaultBlurSigma,
-          sigmaY: CupertinoPopupSurface.defaultBlurSigma,
-        ),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: CupertinoDynamicColor.resolve(
-              CupertinoColors.systemBackground.withValues(alpha: 0.72),
-              context,
-            ),
-          ),
-          child: child,
-        ),
-      ),
+      child: child,
     );
   }
 }
@@ -1354,22 +1349,10 @@ final class _CupertinoActionSheetSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
+    return LmGlassSurface(
+      variant: LmGlassSurfaceVariant.actionSheet,
       borderRadius: BorderRadius.circular(_cupertinoActionSheetCornerRadius),
-      clipBehavior: Clip.antiAlias,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: CupertinoPopupSurface.defaultBlurSigma,
-          sigmaY: CupertinoPopupSurface.defaultBlurSigma,
-        ),
-        child: ColoredBox(
-          color: CupertinoDynamicColor.resolve(
-            CupertinoColors.systemBackground.withValues(alpha: 0.72),
-            context,
-          ),
-          child: child,
-        ),
-      ),
+      child: child,
     );
   }
 }

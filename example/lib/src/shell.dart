@@ -41,6 +41,7 @@ final class FieldOrdersShell extends StatelessWidget {
         }
         return LmAdaptiveChromeScaffold(
           router: router,
+          glass: const LmGlassThemeData.liquid(),
           edgeBackGestureEnabled: true,
           edgeWidth: 192,
           bottomBarBuilder: (context, router) =>

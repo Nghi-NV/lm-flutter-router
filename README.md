@@ -170,12 +170,20 @@ tablet portrait widths should use the sidebar too:
 LmAdaptiveChromeScaffold(
   router: router,
   sidebarOnMedium: true,
+  glass: const LmGlassThemeData.liquid(),
   bottomBarBuilder: (context, router) => MyBottomTabs(router: router),
   sidebarBuilder: (context, router) => MyTabletSidebar(router: router),
   expandedContentBuilder: (context, child) => MyTabletFrame(child: child),
   child: child,
 );
 ```
+
+Use `LmGlassSurface` directly for iOS 26-style custom controls, popovers, and
+floating panels. The package also uses the same surface internally for
+router-owned sheets, action sheets, popovers, and dialog chrome. The
+implementation follows Apple's Liquid Glass guidance by keeping glass on the
+functional chrome layer and falling back to a more opaque surface in high
+contrast environments.
 
 Use `LmAdaptiveRouterSplitView` when you need to project the same semantic route
 stack into compact mobile navigation or expanded split-pane navigation.

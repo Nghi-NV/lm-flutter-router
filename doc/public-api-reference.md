@@ -89,6 +89,9 @@ dart doc --dry-run
 - `LmRouteChrome`: route-level tabbar/navigation-bar visibility metadata.
 - `LmTabBarVisibility`: tabbar visibility policy.
 - `LmNavigationBarPolicy`: navigation-bar behavior metadata.
+- `LmGlassThemeData`, `LmGlassIntensity`, `LmGlassSurfaceVariant`, and
+  `LmGlassSurface`: iOS 26-style Liquid Glass primitives for custom chrome,
+  panels, popovers, action sheets, and alerts with high-contrast fallback.
 - `LmAdaptiveChromeScaffold`: high-level adaptive chrome wrapper with custom
   bottom-bar, tablet sidebar, opt-in medium-width sidebar, and per-layout
   content wrapper slots.

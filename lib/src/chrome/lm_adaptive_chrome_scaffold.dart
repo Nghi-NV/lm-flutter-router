@@ -4,6 +4,7 @@ import '../adaptive/lm_adaptive_policy.dart';
 import '../adaptive/lm_adaptive_shell.dart';
 import '../router/lm_router.dart';
 import 'lm_chrome_scaffold.dart';
+import 'lm_glass_surface.dart';
 
 typedef LmAdaptiveChromeWidgetBuilder =
     Widget? Function(BuildContext context, LmRouter router);
@@ -20,6 +21,7 @@ final class LmAdaptiveChromeScaffold extends StatelessWidget {
     this.compactContentBuilder,
     this.mediumContentBuilder,
     this.expandedContentBuilder,
+    this.glass,
     this.sidebarOnMedium = false,
     this.sidebarWidth = 248,
     this.sidebarDivider = const VerticalDivider(width: 1),
@@ -42,6 +44,7 @@ final class LmAdaptiveChromeScaffold extends StatelessWidget {
   final LmAdaptiveChromeContentBuilder? compactContentBuilder;
   final LmAdaptiveChromeContentBuilder? mediumContentBuilder;
   final LmAdaptiveChromeContentBuilder? expandedContentBuilder;
+  final LmGlassThemeData? glass;
   final bool sidebarOnMedium;
   final double sidebarWidth;
   final Widget sidebarDivider;
@@ -69,7 +72,10 @@ final class LmAdaptiveChromeScaffold extends StatelessWidget {
     return LmChromeScaffold(
       controller: router.controller,
       body: _wrapContent(context, child, compactContentBuilder),
-      bottomNavigationBar: bottomBarBuilder?.call(context, router),
+      bottomNavigationBar: _wrapGlass(
+        bottomBarBuilder?.call(context, router),
+        LmGlassSurfaceVariant.bar,
+      ),
       duration: duration,
       edgeBackGestureEnabled: edgeBackGestureEnabled,
       edgeStartInset: edgeStartInset,
@@ -99,7 +105,10 @@ final class LmAdaptiveChromeScaffold extends StatelessWidget {
     BuildContext context,
     LmAdaptiveChromeContentBuilder? contentBuilder,
   ) {
-    final sidebar = sidebarBuilder?.call(context, router);
+    final sidebar = _wrapGlass(
+      sidebarBuilder?.call(context, router),
+      LmGlassSurfaceVariant.sidebar,
+    );
     final content = _wrapContent(context, child, contentBuilder);
     if (sidebar == null) {
       return content;
@@ -121,5 +130,13 @@ final class LmAdaptiveChromeScaffold extends StatelessWidget {
     LmAdaptiveChromeContentBuilder? builder,
   ) {
     return builder == null ? child : builder(context, child);
+  }
+
+  Widget? _wrapGlass(Widget? child, LmGlassSurfaceVariant variant) {
+    final glassTheme = glass;
+    if (child == null || glassTheme == null) {
+      return child;
+    }
+    return LmGlassSurface(variant: variant, theme: glassTheme, child: child);
   }
 }

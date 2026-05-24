@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lm_flutter_router/src/chrome/lm_glass_surface.dart';
 import 'package:lm_flutter_router/src/modal/lm_modal_presentation.dart';
 import 'package:lm_flutter_router/src/transitions/lm_cupertino_sheet_content_page.dart';
 import 'package:lm_flutter_router/src/transitions/lm_cupertino_sheet_deep_link.dart';
@@ -850,6 +851,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(BackdropFilter), findsOneWidget);
+    expect(find.byType(LmGlassSurface), findsOneWidget);
   });
 
   testWidgets('custom iOS dialogs render as compact blurred alert material', (
@@ -892,6 +894,7 @@ void main() {
     expect(contentRect.width, lessThanOrEqualTo(270));
     expect(find.byType(CupertinoPopupSurface), findsOneWidget);
     expect(find.byType(BackdropFilter), findsOneWidget);
+    expect(find.byType(LmGlassSurface), findsOneWidget);
   });
 
   testWidgets('custom iOS modal barriers resolve darker in dark mode', (

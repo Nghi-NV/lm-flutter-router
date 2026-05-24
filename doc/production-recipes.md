@@ -72,11 +72,21 @@ on compact layouts and custom sidebar chrome on expanded layouts. Add
 LmAdaptiveChromeScaffold(
   router: router,
   sidebarOnMedium: true,
+  glass: const LmGlassThemeData.liquid(),
   bottomBarBuilder: (context, router) => OrdersBottomTabs(router: router),
   sidebarBuilder: (context, router) => OrdersSidebar(router: router),
   mediumContentBuilder: (context, child) => TabletHeader(child: child),
   expandedContentBuilder: (context, child) => TabletHeader(child: child),
   child: child,
+);
+```
+
+For standalone floating controls, use `LmGlassSurface` directly:
+
+```dart
+LmGlassSurface(
+  variant: LmGlassSurfaceVariant.popover,
+  child: OrderFilterPanel(),
 );
 ```
 
