@@ -296,31 +296,80 @@ final class _FieldOrdersAppState extends State<FieldOrdersApp> {
         ),
         Lm.dialog<void>(
           path: '/lab/modal/dialog',
-          build: (context, params) => const LabModalContent(kind: 'dialog'),
+          build: (context, params) => const LabModalContent(
+            kind: 'dialog',
+            modalPath: '/lab/modal/dialog',
+          ),
+        ),
+        Lm.dialog<void>(
+          path: '/lab/glass/modal/dialog',
+          build: (context, params) => const LabModalContent(
+            kind: 'dialog',
+            modalPath: '/lab/glass/modal/dialog',
+          ),
         ),
         Lm.cupertinoDialog<void>(
           path: '/lab/modal/cupertino-dialog',
-          build: (context, params) =>
-              const LabModalContent(kind: 'cupertino-dialog'),
+          build: (context, params) => const LabModalContent(
+            kind: 'cupertino-dialog',
+            modalPath: '/lab/modal/cupertino-dialog',
+          ),
         ),
         Lm.sheet<void>(
           path: '/lab/modal/bottom-sheet',
-          build: (context, params) =>
-              const LabModalContent(kind: 'bottom-sheet'),
+          build: (context, params) => const LabModalContent(
+            kind: 'bottom-sheet',
+            modalPath: '/lab/modal/bottom-sheet',
+          ),
+        ),
+        Lm.sheet<void>(
+          path: '/lab/glass/modal/bottom-sheet',
+          build: (context, params) => const LabModalContent(
+            kind: 'bottom-sheet',
+            modalPath: '/lab/glass/modal/bottom-sheet',
+          ),
         ),
         Lm.actionSheet<void>(
           path: '/lab/modal/action-sheet',
-          build: (context, params) =>
-              const LabModalContent(kind: 'action-sheet'),
+          build: (context, params) => const LabModalContent(
+            kind: 'action-sheet',
+            modalPath: '/lab/modal/action-sheet',
+          ),
+        ),
+        Lm.actionSheet<void>(
+          path: '/lab/glass/modal/action-sheet',
+          build: (context, params) => const LabModalContent(
+            kind: 'action-sheet',
+            modalPath: '/lab/glass/modal/action-sheet',
+          ),
         ),
         Lm.fullscreenDialog<void>(
           path: '/lab/modal/fullscreen-dialog',
-          build: (context, params) =>
-              const LabModalContent(kind: 'fullscreen-dialog'),
+          build: (context, params) => const LabModalContent(
+            kind: 'fullscreen-dialog',
+            modalPath: '/lab/modal/fullscreen-dialog',
+          ),
+        ),
+        Lm.fullscreenDialog<void>(
+          path: '/lab/glass/modal/fullscreen-dialog',
+          build: (context, params) => const LabModalContent(
+            kind: 'fullscreen-dialog',
+            modalPath: '/lab/glass/modal/fullscreen-dialog',
+          ),
         ),
         Lm.popover<void>(
           path: '/lab/modal/popover',
-          build: (context, params) => const LabModalContent(kind: 'popover'),
+          build: (context, params) => const LabModalContent(
+            kind: 'popover',
+            modalPath: '/lab/modal/popover',
+          ),
+        ),
+        Lm.popover<void>(
+          path: '/lab/glass/modal/popover',
+          build: (context, params) => const LabModalContent(
+            kind: 'popover',
+            modalPath: '/lab/glass/modal/popover',
+          ),
         ),
       ],
     );

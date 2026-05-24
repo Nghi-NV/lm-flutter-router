@@ -1,5 +1,6 @@
 import 'dart:ui' show ImageFilter;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 enum LmGlassSurfaceVariant {
@@ -76,31 +77,28 @@ final class LmGlassSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = borderRadius ?? _radiusFor(variant);
-    final decoration = _decorationFor(
-      context,
-      highContrast: _highContrast(context),
-    );
+    final highContrast = _highContrast(context);
+    final decoration = _decorationFor(context, highContrast: highContrast);
     final content = Padding(padding: padding ?? EdgeInsets.zero, child: child);
-
-    if (!theme.enabled || _highContrast(context)) {
-      return ClipRRect(
-        borderRadius: radius,
-        clipBehavior: Clip.antiAlias,
-        child: DecoratedBox(decoration: decoration, child: content),
-      );
-    }
-
-    return ClipRRect(
+    final inner = ClipRRect(
       borderRadius: radius,
       clipBehavior: Clip.antiAlias,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: theme.resolvedBlurSigma,
-          sigmaY: theme.resolvedBlurSigma,
-        ),
-        child: DecoratedBox(decoration: decoration, child: content),
-      ),
+      child: !theme.enabled || highContrast
+          ? DecoratedBox(decoration: decoration, child: content)
+          : BackdropFilter(
+              filter: ImageFilter.blur(
+                sigmaX: theme.resolvedBlurSigma,
+                sigmaY: theme.resolvedBlurSigma,
+              ),
+              child: DecoratedBox(decoration: decoration, child: content),
+            ),
     );
+
+    final shadow = _shadowDecorationFor(context, highContrast: highContrast);
+    if (shadow == null) {
+      return inner;
+    }
+    return DecoratedBox(decoration: shadow, child: inner);
   }
 
   bool _highContrast(BuildContext context) {
@@ -111,22 +109,26 @@ final class LmGlassSurface extends StatelessWidget {
     BuildContext context, {
     required bool highContrast,
   }) {
-    final brightness = Theme.of(context).brightness;
+    final brightness =
+        CupertinoTheme.maybeBrightnessOf(context) ??
+        Theme.of(context).brightness;
     final dark = brightness == Brightness.dark;
-    final tintBase = dark ? Colors.black : Colors.white;
-    final strokeBase = dark ? Colors.white : Colors.black;
-    final tintOpacity = highContrast ? 0.92 : _tintOpacityFor(variant);
-    final borderOpacity = highContrast ? 0.42 : theme.borderOpacity;
+    final scheme = Theme.of(context).colorScheme;
+    final tintBase = highContrast
+        ? scheme.surface
+        : dark
+        ? Colors.black
+        : Colors.white;
+    final strokeBase = highContrast
+        ? scheme.onSurface
+        : dark
+        ? Colors.white
+        : Colors.black;
+    final tintOpacity = highContrast ? 1.0 : _tintOpacityFor(variant);
+    final borderOpacity = highContrast ? 0.62 : theme.borderOpacity;
     return BoxDecoration(
       color: tintBase.withValues(alpha: tintOpacity),
       border: Border.all(color: strokeBase.withValues(alpha: borderOpacity)),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: dark ? 0.28 : 0.14),
-          blurRadius: _shadowBlurFor(variant),
-          offset: const Offset(0, 10),
-        ),
-      ],
       gradient: highContrast
           ? null
           : LinearGradient(
@@ -137,6 +139,29 @@ final class LmGlassSurface extends StatelessWidget {
                 tintBase.withValues(alpha: 0),
               ],
             ),
+    );
+  }
+
+  BoxDecoration? _shadowDecorationFor(
+    BuildContext context, {
+    required bool highContrast,
+  }) {
+    if (!theme.enabled || highContrast) {
+      return null;
+    }
+    final brightness =
+        CupertinoTheme.maybeBrightnessOf(context) ??
+        Theme.of(context).brightness;
+    final dark = brightness == Brightness.dark;
+    return BoxDecoration(
+      borderRadius: borderRadius ?? _radiusFor(variant),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: dark ? 0.22 : 0.10),
+          blurRadius: _shadowBlurFor(variant),
+          offset: const Offset(0, 10),
+        ),
+      ],
     );
   }
 

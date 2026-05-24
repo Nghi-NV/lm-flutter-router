@@ -310,6 +310,205 @@ void main() {
     expect(find.byType(CupertinoTabBar), findsNothing);
   });
 
+  testWidgets('router lab glass view is reachable from the Lab tab', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(const FieldOrdersApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Lab').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('iOS 26 Glass Lab'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Prominent panel'), findsOneWidget);
+    expect(find.text('Floating glass bar'), findsOneWidget);
+    expect(find.byType(CupertinoTabBar), findsNothing);
+  });
+
+  testWidgets('glass modal buttons keep the glass page as background', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      const FieldOrdersApp(initialLocation: '/lab/glass'),
+    );
+    await tester.pumpAndSettle();
+
+    final glassSheet = find.widgetWithText(ActionChip, 'Glass sheet');
+    await tester.ensureVisible(glassSheet);
+    await tester.pumpAndSettle();
+    await tester.tap(glassSheet);
+    await _pumpModalTransition(tester);
+
+    expect(find.text('Glass sheet presentation'), findsOneWidget);
+    expect(
+      find.textContaining('/lab/glass/modal/bottom-sheet'),
+      findsOneWidget,
+    );
+    expect(find.text('Prominent panel'), findsOneWidget);
+    expect(find.text('Router Lab').hitTestable(), findsNothing);
+
+    await tester.tap(
+      find.widgetWithText(CupertinoButton, 'Dismiss').hitTestable(),
+    );
+    await _pumpModalTransition(tester);
+
+    expect(find.text('Glass sheet presentation'), findsNothing);
+    expect(find.text('Prominent panel'), findsOneWidget);
+  });
+
+  testWidgets('glass lab modals work from the real tab navigation flow', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(const FieldOrdersApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Lab').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('iOS 26 Glass Lab'));
+    await tester.pumpAndSettle();
+
+    final cases = <(String, String, String)>[
+      ('Glass dialog', 'Glass dialog presentation', '/lab/glass/modal/dialog'),
+      (
+        'Glass sheet',
+        'Glass sheet presentation',
+        '/lab/glass/modal/bottom-sheet',
+      ),
+      (
+        'Glass action sheet',
+        'Glass action sheet presentation',
+        '/lab/glass/modal/action-sheet',
+      ),
+      (
+        'Glass popover',
+        'Glass popover presentation',
+        '/lab/glass/modal/popover',
+      ),
+    ];
+
+    for (final (button, title, path) in cases) {
+      final chip = find.widgetWithText(ActionChip, button);
+      await tester.ensureVisible(chip);
+      await tester.pumpAndSettle();
+      await tester.tap(chip);
+      await _pumpModalTransition(tester);
+
+      expect(find.text(title), findsOneWidget);
+      expect(find.textContaining(path), findsOneWidget);
+      expect(find.text('Prominent panel'), findsOneWidget);
+      expect(find.text('Router Lab').hitTestable(), findsNothing);
+      expect(find.text('Push Cupertino').hitTestable(), findsNothing);
+      expect(tester.takeException(), isNull);
+
+      await tester.binding.handlePopRoute();
+      await _pumpModalTransition(tester);
+
+      expect(find.text(title), findsNothing);
+      expect(find.text('Prominent panel'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    }
+  });
+
+  testWidgets('glass view avoids compact overflow at large text scale', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          size: Size(320, 568),
+          textScaler: TextScaler.linear(1.3),
+        ),
+        child: const FieldOrdersApp(initialLocation: '/lab/glass'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Prominent panel'), findsOneWidget);
+    expect(find.text('Floating glass bar').hitTestable(), findsOneWidget);
+    expect(find.text('Back').hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('glass sheet stays inside compact and tablet viewports', (
+    tester,
+  ) async {
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    const sizes = <Size>[
+      Size(320, 568),
+      Size(390, 844),
+      Size(768, 1024),
+      Size(1024, 768),
+    ];
+
+    for (final size in sizes) {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+
+      await tester.pumpWidget(
+        const FieldOrdersApp(initialLocation: '/lab/glass'),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.text('Glass sheet'),
+        320,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Glass sheet'));
+      await _pumpModalTransition(tester);
+
+      final sheetTitle = find.text('Glass sheet presentation');
+      expect(sheetTitle, findsOneWidget);
+      final titleRect = tester.getRect(sheetTitle);
+      expect(titleRect.left, greaterThanOrEqualTo(0));
+      expect(titleRect.right, lessThanOrEqualTo(size.width));
+      expect(titleRect.top, greaterThanOrEqualTo(0));
+      expect(titleRect.bottom, lessThanOrEqualTo(size.height));
+      expect(find.text('Prominent panel'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      await tester.binding.handlePopRoute();
+      await _pumpModalTransition(tester);
+
+      expect(find.text('Glass sheet presentation'), findsNothing);
+      expect(tester.takeException(), isNull);
+    }
+  });
+
   testWidgets('top app bar title aligns left when there is no back button', (
     tester,
   ) async {

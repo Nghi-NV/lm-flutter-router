@@ -540,7 +540,7 @@ final class LmRouterDelegate extends RouterDelegate<LmLocation>
         );
       }
       return _NavigationOutcome<bool>(handled, duration);
-    });
+    }, waitForIdle: controller.state.modalStack.isEmpty);
   }
 
   LmNavigationTransaction _beginTransaction({

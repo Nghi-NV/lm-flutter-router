@@ -602,13 +602,14 @@ final class LabGlassViewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
     return DecoratedBox(
       decoration: const BoxDecoration(color: Color(0xfff5f7fb)),
       child: Stack(
         children: [
           Positioned.fill(child: CustomPaint(painter: _GlassBackdropPainter())),
           ListView(
-            padding: const EdgeInsets.fromLTRB(18, 88, 18, 112),
+            padding: EdgeInsets.fromLTRB(18, 88, 18, 156 + bottomInset),
             children: [
               Text(
                 'iOS 26 Glass Lab',
@@ -701,35 +702,55 @@ final class LabGlassViewScreen extends StatelessWidget {
             ],
           ),
           Positioned(
-            left: 18,
-            right: 18,
-            bottom: 18,
+            left: 0,
+            right: 0,
+            bottom: 0,
             child: LmGlassSurface(
               variant: LmGlassSurfaceVariant.bar,
+              borderRadius: BorderRadius.zero,
               theme: const LmGlassThemeData.liquid(
                 intensity: LmGlassIntensity.prominent,
                 tintOpacity: 0.42,
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
+              child: LmGlassSurface(
+                variant: LmGlassSurfaceVariant.bar,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(26),
                 ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.auto_awesome, color: Color(0xff2563eb)),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Text(
-                        'Floating glass bar',
-                        style: TextStyle(fontWeight: FontWeight.w800),
-                      ),
+                theme: const LmGlassThemeData.liquid(
+                  intensity: LmGlassIntensity.prominent,
+                  tintOpacity: 0.32,
+                ),
+                child: SafeArea(
+                  top: false,
+                  minimum: const EdgeInsets.fromLTRB(18, 10, 18, 12),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
                     ),
-                    FilledButton(
-                      onPressed: () => unawaited(context.lm.pop()),
-                      child: const Text('Back'),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.auto_awesome,
+                          color: Color(0xff2563eb),
+                        ),
+                        const SizedBox(width: 10),
+                        const Expanded(
+                          child: Text(
+                            'Floating glass bar',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                        FilledButton(
+                          onPressed: () => unawaited(context.lm.pop()),
+                          child: const Text('Back'),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -744,6 +765,9 @@ final class _GlassModalButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final router = context.lm;
+    final prefix = router.location.path.startsWith('/lab/glass')
+        ? '/lab/glass/modal'
+        : '/lab/modal';
     return Wrap(
       spacing: 10,
       runSpacing: 10,
@@ -751,22 +775,26 @@ final class _GlassModalButtons extends StatelessWidget {
         _LabAction(
           label: 'Glass dialog',
           icon: Icons.crop_square,
-          onTap: () => unawaited(router.present(labModalPath('dialog'))),
+          onTap: () =>
+              unawaited(router.present(labModalPath('dialog', prefix))),
         ),
         _LabAction(
           label: 'Glass sheet',
           icon: Icons.vertical_align_bottom,
-          onTap: () => unawaited(router.present(labModalPath('bottom-sheet'))),
+          onTap: () =>
+              unawaited(router.present(labModalPath('bottom-sheet', prefix))),
         ),
         _LabAction(
           label: 'Glass action sheet',
           icon: Icons.ios_share,
-          onTap: () => unawaited(router.present(labModalPath('action-sheet'))),
+          onTap: () =>
+              unawaited(router.present(labModalPath('action-sheet', prefix))),
         ),
         _LabAction(
           label: 'Glass popover',
           icon: Icons.web_asset_outlined,
-          onTap: () => unawaited(router.present(labModalPath('popover'))),
+          onTap: () =>
+              unawaited(router.present(labModalPath('popover', prefix))),
         ),
       ],
     );
@@ -1304,14 +1332,23 @@ String _trackTitle(int index) {
 }
 
 final class LabModalContent extends StatelessWidget {
-  const LabModalContent({required this.kind, super.key});
+  const LabModalContent({
+    required this.kind,
+    required this.modalPath,
+    super.key,
+  });
 
   final String kind;
+  final String modalPath;
 
   @override
   Widget build(BuildContext context) {
     final router = context.lm;
-    final title = '${_titleFromKind(kind)} presentation';
+    final isGlass = modalPath.startsWith('/lab/glass/modal');
+    final title = isGlass
+        ? '${_glassTitleFromKind(kind)} presentation'
+        : '${_titleFromKind(kind)} presentation';
+    final modalPrefix = isGlass ? '/lab/glass/modal' : '/lab/modal';
 
     if (kind == 'action-sheet') {
       return SafeArea(
@@ -1329,8 +1366,17 @@ final class LabModalContent extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'Route-owned action sheets dim the background and use frosted '
-                'iOS popup material.',
+                isGlass
+                    ? 'Route-owned glass action sheets keep the glass page '
+                          'mounted behind a blurred popup surface.'
+                    : 'Route-owned action sheets dim the background and use '
+                          'frosted iOS popup material.',
+                style: CupertinoTheme.of(context).textTheme.textStyle,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Modal path: $modalPath',
                 style: CupertinoTheme.of(context).textTheme.textStyle,
                 textAlign: TextAlign.center,
               ),
@@ -1352,34 +1398,45 @@ final class LabModalContent extends StatelessWidget {
           top: false,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(title, style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 8),
-                Text(
-                  'iOS 15 style sheet page with a top gap, rounded surface, '
-                  'stacked background scale, light barrier, and drag-to-dismiss.',
-                ),
-                const SizedBox(height: 20),
-                CupertinoButton.filled(
-                  onPressed: () => unawaited(router.pop()),
-                  child: const Text('Dismiss'),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: () => unawaited(
-                    router.present(labModalPath('fullscreen-dialog')),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(title, style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 8),
+                  Text(
+                    isGlass
+                        ? 'Glass sheet page with a blurred full-width surface, '
+                              'safe-area ownership, and drag-to-dismiss.'
+                        : 'iOS 15 style sheet page with a top gap, rounded '
+                              'surface, stacked background scale, light '
+                              'barrier, and drag-to-dismiss.',
                   ),
-                  child: const Text('Open stacked modal'),
-                ),
-                const Spacer(),
-                Text(
-                  'Drag down anywhere on this sheet to dismiss.',
-                  style: Theme.of(context).textTheme.bodySmall,
-                  textAlign: TextAlign.center,
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text('Modal path: $modalPath'),
+                  const SizedBox(height: 20),
+                  CupertinoButton.filled(
+                    onPressed: () => unawaited(router.pop()),
+                    child: const Text('Dismiss'),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton(
+                    onPressed: () => unawaited(
+                      router.present(
+                        labModalPath('fullscreen-dialog', modalPrefix),
+                      ),
+                    ),
+                    child: const Text('Open stacked modal'),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Drag down anywhere on this sheet to dismiss.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1395,11 +1452,22 @@ final class LabModalContent extends StatelessWidget {
             icon: const Icon(Icons.close),
           ),
         ),
-        body: _CupertinoModalPanel(kind: kind, title: title, centered: false),
+        body: _CupertinoModalPanel(
+          kind: kind,
+          title: title,
+          modalPath: modalPath,
+          isGlass: isGlass,
+          centered: false,
+        ),
       );
     }
 
-    return _CupertinoModalPanel(kind: kind, title: title);
+    return _CupertinoModalPanel(
+      kind: kind,
+      title: title,
+      modalPath: modalPath,
+      isGlass: isGlass,
+    );
   }
 }
 
@@ -1407,11 +1475,15 @@ final class _CupertinoModalPanel extends StatelessWidget {
   const _CupertinoModalPanel({
     required this.kind,
     required this.title,
+    required this.modalPath,
+    required this.isGlass,
     this.centered = true,
   });
 
   final String kind;
   final String title;
+  final String modalPath;
+  final bool isGlass;
   final bool centered;
 
   @override
@@ -1433,7 +1505,7 @@ final class _CupertinoModalPanel extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Modal path: /lab/modal/$kind. Back dismisses the modal before '
+            'Modal path: $modalPath. Back dismisses the modal before '
             'popping the page stack.',
             style: textStyle,
             textAlign: centered ? TextAlign.center : TextAlign.start,
@@ -1452,7 +1524,16 @@ final class _CupertinoModalPanel extends StatelessWidget {
     if (!centered) {
       return panel;
     }
-    return IntrinsicWidth(child: panel);
+    final widthConstrained = IntrinsicWidth(child: panel);
+    if (!isGlass) {
+      return widthConstrained;
+    }
+    return LmGlassSurface(
+      variant: kind == 'popover'
+          ? LmGlassSurfaceVariant.popover
+          : LmGlassSurfaceVariant.alert,
+      child: widthConstrained,
+    );
   }
 }
 
@@ -1582,6 +1663,19 @@ String _titleFromKind(String kind) {
   };
 }
 
+String _glassTitleFromKind(String kind) {
+  return switch (kind) {
+    'dialog' => 'Glass dialog',
+    'bottom-sheet' => 'Glass sheet',
+    'action-sheet' => 'Glass action sheet',
+    'fullscreen-dialog' => 'Glass fullscreen dialog',
+    'popover' => 'Glass popover',
+    _ => 'Glass ${_titleFromKind(kind)}',
+  };
+}
+
 String labTransitionPath(String kind) => '/lab/$kind';
 
-String labModalPath(String kind) => '/lab/modal/$kind';
+String labModalPath(String kind, [String prefix = '/lab/modal']) {
+  return '$prefix/$kind';
+}

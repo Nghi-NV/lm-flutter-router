@@ -1312,15 +1312,7 @@ final class _CupertinoPopupMaterialSurface extends StatelessWidget {
     return CupertinoPopupSurface(
       child: LmGlassSurface(
         variant: LmGlassSurfaceVariant.alert,
-        theme: const LmGlassThemeData(
-          enabled: false,
-          intensity: LmGlassIntensity.regular,
-          blurSigma: 0,
-          tintOpacity: 0,
-          borderOpacity: 0.18,
-          highlightOpacity: 0.10,
-        ),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(26),
         child: child,
       ),
     );

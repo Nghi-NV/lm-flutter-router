@@ -893,7 +893,7 @@ void main() {
     );
     expect(contentRect.width, lessThanOrEqualTo(270));
     expect(find.byType(CupertinoPopupSurface), findsOneWidget);
-    expect(find.byType(BackdropFilter), findsOneWidget);
+    expect(find.byType(BackdropFilter), findsNWidgets(2));
     expect(find.byType(LmGlassSurface), findsOneWidget);
   });
 
