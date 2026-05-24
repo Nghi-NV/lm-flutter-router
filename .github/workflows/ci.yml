@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Install package dependencies
+        run: flutter pub get
+      - name: Analyze package
+        run: dart analyze
+      - name: Validate API docs
+        run: dart doc --dry-run
+      - name: Test package
+        run: flutter test
+      - name: Benchmark smoke
+        run: |
+          mkdir -p build/reports
+          flutter test benchmark/router_benchmark.dart | tee build/reports/router_benchmark.txt
+      - name: Upload benchmark report
+        uses: actions/upload-artifact@v4
+        with:
+          name: router-benchmark
+          path: build/reports/router_benchmark.txt
+      - name: Pub dry run
+        run: flutter pub publish --dry-run
+
+  example:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Install example dependencies
+        working-directory: example
+        run: flutter pub get
+      - name: Analyze example
+        working-directory: example
+        run: dart analyze
+      - name: Test example
+        working-directory: example
+        run: flutter test
+      - name: Build example web
+        working-directory: example
+        run: flutter build web --dart-define=LM_ROUTER_WEB_SMOKE=true
+      - name: Web router smoke
+        working-directory: example
+        run: |
+          mkdir -p build/reports
+          node tool/web_perf_smoke.mjs | tee build/reports/web_perf_smoke.txt
+      - name: Upload web smoke report
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-perf-smoke
+          path: example/build/reports/web_perf_smoke.txt
+      - name: Build example Android debug
+        working-directory: example
+        run: flutter build apk --debug

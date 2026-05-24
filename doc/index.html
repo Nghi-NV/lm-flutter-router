@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>lm_flutter_router Documentation</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-soft: #eef6f2;
+      --text: #17202a;
+      --muted: #526172;
+      --line: #d8dee8;
+      --accent: #0f8f68;
+      --accent-strong: #087452;
+      --code-bg: #18202a;
+      --code-text: #edf6ff;
+      --warn-bg: #fff8e5;
+      --warn-text: #5c4300;
+      --radius: 8px;
+      --shadow: 0 16px 42px rgba(28, 38, 52, 0.10);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111417;
+        --panel: #181d22;
+        --panel-soft: #16241f;
+        --text: #eef3f7;
+        --muted: #a8b3bf;
+        --line: #2a333d;
+        --accent: #49d39f;
+        --accent-strong: #6ee7b7;
+        --code-bg: #090d12;
+        --code-text: #eef6ff;
+        --warn-bg: #2a2312;
+        --warn-text: #f6d77b;
+        --shadow: none;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    a { color: var(--accent-strong); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      border-right: 1px solid var(--line);
+      background: var(--panel);
+      padding: 24px 18px;
+    }
+
+    main {
+      width: min(1100px, 100%);
+      padding: 40px 32px 80px;
+    }
+
+    .brand {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+
+    .brand strong {
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    nav {
+      display: grid;
+      gap: 4px;
+    }
+
+    nav a {
+      display: block;
+      padding: 8px 10px;
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    nav a:hover {
+      background: var(--panel-soft);
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(34px, 6vw, 58px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 56px 0 14px;
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 28px 0 10px;
+      font-size: 19px;
+      letter-spacing: 0;
+    }
+
+    p { margin: 0 0 14px; }
+
+    .lead {
+      color: var(--muted);
+      max-width: 780px;
+      font-size: 18px;
+    }
+
+    .hero {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 34px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--text);
+      font-weight: 650;
+    }
+
+    .button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .button:hover { text-decoration: none; filter: brightness(0.98); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 18px 0;
+    }
+
+    .two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+
+    .card h3 { margin-top: 0; }
+    .card p:last-child { margin-bottom: 0; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 0 9px;
+      border-radius: 999px;
+      background: var(--panel-soft);
+      color: var(--accent-strong);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .callout {
+      border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+      border-left: 4px solid var(--accent);
+      background: var(--panel-soft);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin: 18px 0;
+    }
+
+    .warning {
+      border: 1px solid color-mix(in srgb, var(--warn-text) 40%, var(--line));
+      border-left: 4px solid var(--warn-text);
+      background: var(--warn-bg);
+      color: var(--warn-text);
+    }
+
+    pre {
+      overflow: auto;
+      padding: 16px;
+      border-radius: var(--radius);
+      background: var(--code-bg);
+      color: var(--code-text);
+      font-size: 13px;
+      line-height: 1.5;
+      tab-size: 2;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.94em;
+    }
+
+    p code, li code, td code {
+      background: color-mix(in srgb, var(--line) 45%, transparent);
+      border-radius: 4px;
+      padding: 1px 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 11px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+    th { background: var(--panel-soft); }
+
+    ul, ol { padding-left: 22px; }
+
+    .footer {
+      margin-top: 72px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      padding-top: 22px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      aside {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      main { padding: 24px 18px 64px; }
+      .hero { padding: 24px; }
+      .grid, .two { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <strong>lm_flutter_router</strong>
+        <span>Typed adaptive Flutter routing without go_router.</span>
+      </div>
+      <nav aria-label="Documentation sections">
+        <a href="#overview">Overview</a>
+        <a href="#install">Install</a>
+        <a href="#quick-start">Quick Start</a>
+        <a href="#api">API Cheat Sheet</a>
+        <a href="#routes">Routes</a>
+        <a href="#modals">Modals</a>
+        <a href="#deeplinks">Deep Links</a>
+        <a href="#guards">Guards</a>
+        <a href="#adaptive">Adaptive Layout</a>
+        <a href="#ios">iOS 15 Sheet</a>
+        <a href="#testing">Testing</a>
+        <a href="#more">More Docs</a>
+      </nav>
+    </aside>
+
+    <main>
+      <section id="overview" class="hero">
+        <span class="badge">Stable preview API</span>
+        <h1>Flutter routing that owns pages, sheets, tabs, links, and back.</h1>
+        <p class="lead">
+          `lm_flutter_router` provides a custom `RouterDelegate` engine with
+          typed route definitions, guarded navigation, browser/deep-link support,
+          iOS-style transitions, router-owned modals, and adaptive split views.
+          The common API is intentionally small: start with `Lm.router`,
+          `Lm.page`, `Lm.sheet`, `Lm.guard`, and `context.lm`.
+        </p>
+        <div class="actions">
+          <a class="button primary" href="#quick-start">Start With Code</a>
+          <a class="button" href="public-api-reference.md">Public API Reference</a>
+          <a class="button" href="production-recipes.md">Production Recipes</a>
+        </div>
+      </section>
+
+      <section id="install">
+        <h2>Install</h2>
+        <p>Add the package to your Flutter app:</p>
+<pre><code class="language-yaml">dependencies:
+  lm_flutter_router: ^0.0.1</code></pre>
+        <p>Import the stable preview API in app code:</p>
+<pre><code class="language-dart">import 'package:lm_flutter_router/lm_flutter_router.dart';</code></pre>
+        <div class="warning">
+          <strong>Advanced import:</strong> use
+          <code>lm_flutter_router_advanced.dart</code> only when building custom
+          framework integrations around the delegate, matcher, state nodes, or
+          page factory.
+        </div>
+      </section>
+
+      <section id="quick-start">
+        <h2>Quick Start</h2>
+        <p>
+          `Lm.platformRouter` reads the current browser/platform route
+          automatically. `router.scopedBuilder()` exposes `context.lm` to the app.
+        </p>
+<pre><code class="language-dart">import 'package:flutter/material.dart';
+import 'package:lm_flutter_router/lm_flutter_router.dart';
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final router = Lm.platformRouter(
+    routes: [
+      Lm.page&lt;void&gt;(
+        path: '/',
+        build: (context, _) =&gt; const Text('Home'),
+      ),
+      Lm.page&lt;int&gt;(
+        path: '/orders/:orderId',
+        decode: (params) =&gt; Lm.params(params).requiredInt('orderId'),
+        buildPath: (orderId) =&gt; '/orders/$orderId',
+        build: (context, orderId) =&gt; Text('Order $orderId'),
+      ),
+    ],
+  );
+
+  runApp(
+    MaterialApp.router(
+      routerConfig: router.config,
+      builder: router.scopedBuilder(),
+    ),
+  );
+}</code></pre>
+      </section>
+
+      <section id="api">
+        <h2>API Cheat Sheet</h2>
+        <div class="grid">
+          <article class="card">
+            <h3>Setup</h3>
+            <p><code>Lm.router</code>, <code>Lm.platformRouter</code>, and
+            <code>router.scopedBuilder()</code> cover normal app wiring.</p>
+          </article>
+          <article class="card">
+            <h3>Routes</h3>
+            <p><code>Lm.page</code> defines pages. Use <code>decode</code> and
+            <code>buildPath</code> when the route has typed params.</p>
+          </article>
+          <article class="card">
+            <h3>Navigation</h3>
+            <p>Use <code>context.lm.go</code>, <code>push</code>,
+            <code>replace</code>, <code>present</code>, and <code>pop</code>.</p>
+          </article>
+          <article class="card">
+            <h3>Modals</h3>
+            <p><code>Lm.dialog</code>, <code>Lm.sheet</code>,
+            <code>Lm.actionSheet</code>, <code>Lm.fullscreenDialog</code>, and
+            <code>Lm.popover</code> make modals route-aware.</p>
+          </article>
+          <article class="card">
+            <h3>Links</h3>
+            <p><code>Lm.links</code> maps external or legacy URLs into internal
+            paths. Existing app paths need no setup.</p>
+          </article>
+          <article class="card">
+            <h3>Guards</h3>
+            <p><code>Lm.guard</code> handles simple auth checks without forcing
+            a custom guard class.</p>
+          </article>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Create router from the current URL</td>
+              <td><code>Lm.platformRouter(routes: [...])</code></td>
+            </tr>
+            <tr>
+              <td>Expose context navigation</td>
+              <td><code>builder: router.scopedBuilder()</code></td>
+            </tr>
+            <tr>
+              <td>Open a page</td>
+              <td><code>context.lm.push('/orders/42')</code></td>
+            </tr>
+            <tr>
+              <td>Open a router-owned modal</td>
+              <td><code>context.lm.present('/orders/42/actions')</code></td>
+            </tr>
+            <tr>
+              <td>Decode an int path param</td>
+              <td><code>Lm.params(params).requiredInt('orderId')</code></td>
+            </tr>
+            <tr>
+              <td>Build a canonical location</td>
+              <td><code>Lm.path('/orders', query: {'tab': 'open'})</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="routes">
+        <h2>Routes</h2>
+        <p>
+          Route names are optional. By default the router derives names from
+          paths, so app code can stay path-first and concise.
+        </p>
+<pre><code class="language-dart">final orderRoute = Lm.page&lt;int&gt;(
+  path: '/orders/:orderId',
+  decode: (params) =&gt; Lm.params(params).requiredInt('orderId'),
+  buildPath: (orderId) =&gt; '/orders/$orderId',
+  build: (context, orderId) =&gt; OrderDetailScreen(orderId: orderId!),
+);
+
+context.lm.push(orderRoute.location(1042));</code></pre>
+        <div class="callout">
+          Use plain strings for simple navigation and route `.location(...)`
+          when you want path construction colocated with the route declaration.
+        </div>
+      </section>
+
+      <section id="modals">
+        <h2>Router-Owned Modals</h2>
+        <p>
+          Declare modals in `modalRoutes` when sheets, action sheets, dialogs, or
+          fullscreen dialogs need deep-link, browser-history, restoration, and
+          system-back support.
+        </p>
+<pre><code class="language-dart">final orderActionsRoute = Lm.actionSheet&lt;int&gt;(
+  path: '/orders/:orderId/actions',
+  decode: (params) =&gt; Lm.params(params).requiredInt('orderId'),
+  buildPath: (orderId) =&gt; '/orders/$orderId/actions',
+  build: (context, orderId) =&gt; OrderActionsSheet(orderId: orderId!),
+);
+
+final router = Lm.router(
+  routes: routes,
+  modalRoutes: [orderActionsRoute],
+);</code></pre>
+        <p>
+          Use <code>context.lm.present(orderActionsRoute.location(1042))</code>
+          to open it. Browser back and system back dismiss the modal before
+          popping page routes.
+        </p>
+      </section>
+
+      <section id="deeplinks">
+        <h2>Deep Links</h2>
+        <p>
+          If incoming URLs already match app paths, no deep-link config is
+          needed. Use `Lm.links` for external domains, old URL formats, or
+          reusable feature-level mappings.
+        </p>
+<pre><code class="language-dart">final router = Lm.router(
+  linkTransformers: [
+    Lm.links(
+      normalize: (uri) =&gt; uri.host == 'field-orders.example'
+          ? Lm.path('/orders/${uri.pathSegments.last}')
+          : null,
+    ),
+  ],
+  routes: routes,
+);</code></pre>
+      </section>
+
+      <section id="guards">
+        <h2>Guards</h2>
+        <p>
+          Guards can allow, block, or redirect. `LmGuardRedirect.toLogin` writes
+          the attempted destination to `?returnTo=...`, so the login page can
+          resume after authentication.
+        </p>
+<pre><code class="language-dart">final router = Lm.router(
+  guards: [
+    Lm.guard((context) {
+      final protected = context.transaction.to.path.startsWith('/orders/');
+      if (!protected || session.isSignedIn) {
+        return const LmGuardAllow();
+      }
+      return LmGuardRedirect.toLogin('/login', context);
+    }),
+  ],
+  refreshListenable: session,
+  routes: routes,
+);</code></pre>
+      </section>
+
+      <section id="adaptive">
+        <h2>Adaptive Layout</h2>
+        <p>
+          Keep one semantic route stack and let layout widgets project it into a
+          compact stack, medium shell, or expanded split view.
+        </p>
+<pre><code class="language-dart">LmAdaptiveRouterSplitView(
+  router: router,
+  primaryPane: const OrdersListPane(),
+  emptySecondary: const EmptyDetailPane(),
+  child: child,
+);</code></pre>
+        <p>
+          Use <code>LmDetailPolicy.secondaryPaneOnExpanded</code> on detail
+          routes that should render in the secondary pane on larger screens.
+        </p>
+        <div class="callout">
+          <strong>Cross-branch navigation:</strong> path navigation owns branch
+          selection. Calling <code>context.lm.go('/settings')</code> from
+          <code>/orders/42</code> switches the active branch to settings and
+          preserves the orders stack. Use <code>context.lm.switchBranch('orders')</code>
+          only for a pure tab/menu switch that restores the destination branch's
+          existing stack.
+        </div>
+<pre><code class="language-dart">// Open a specific route in another branch.
+await context.lm.go('/orders/1042');
+
+// Switch branch without changing that branch's stack.
+context.lm.switchBranch('orders');</code></pre>
+      </section>
+
+      <section id="ios">
+        <h2>iOS-Style Transitions And Sheets</h2>
+        <div class="grid two">
+          <article class="card">
+            <h3>Page Transitions</h3>
+            <p>Use <code>LmTransition.cupertino()</code> for iOS push/pop with
+            edge-swipe progress tracking, or <code>LmTransition.none()</code>
+            for tab roots.</p>
+          </article>
+          <article class="card">
+            <h3>iOS 15 Sheet Page</h3>
+            <p><code>LmTransition.cupertinoSheet()</code> and
+            <code>LmCupertinoSheetNavigator.bound</code> support stacked sheet
+            pages, rounded surfaces, scaled background pages, and nested sheet
+            deep links.</p>
+          </article>
+        </div>
+<pre><code class="language-dart">final sheetConfig = LmCupertinoSheetNestedConfig(
+  sheetPath: '/lab/cupertino-sheet',
+  rootPage: LmCupertinoSheetPage(
+    id: 'root',
+    path: '/lab/cupertino-sheet',
+    builder: (context, navigation) =&gt; SheetHome(navigation: navigation),
+  ),
+  pages: [
+    LmCupertinoSheetPage(
+      id: 'nested',
+      path: '/lab/cupertino-sheet/nested',
+      builder: (context, navigation) =&gt; SheetNested(navigation: navigation),
+    ),
+  ],
+);</code></pre>
+      </section>
+
+      <section id="testing">
+        <h2>Testing And Verification</h2>
+        <p>Run the package checks before release:</p>
+<pre><code class="language-bash">dart analyze
+dart doc --dry-run
+flutter test
+cd example &amp;&amp; flutter test test/widget_test.dart
+cd example &amp;&amp; flutter build web --dart-define=LM_ROUTER_WEB_SMOKE=true</code></pre>
+        <p>The example app also includes <code>example/tool/router_perf_gate.sh</code>
+          for a focused local performance check.</p>
+      </section>
+
+      <section id="more">
+        <h2>More Docs</h2>
+        <div class="grid two">
+          <article class="card">
+            <h3>Adoption</h3>
+            <p><a href="production-recipes.md">Production recipes</a> cover
+            auth redirects, adaptive split view, modals, browser history, and
+            troubleshooting.</p>
+          </article>
+          <article class="card">
+            <h3>API Surface</h3>
+            <p><a href="public-api-reference.md">Public API reference</a>
+            lists stable preview exports and advanced import boundaries.</p>
+          </article>
+          <article class="card">
+            <h3>Quality</h3>
+            <p><a href="compatibility-matrix.md">Compatibility matrix</a>
+            documents supported platform expectations and verification gates.</p>
+          </article>
+        </div>
+      </section>
+
+      <p class="footer">
+        This HTML file is intentionally self-contained. It can be opened
+        directly from disk or served from the repository without a build step.
+      </p>
+    </main>
+  </div>
+</body>
+</html>
