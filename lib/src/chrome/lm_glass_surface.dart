@@ -80,16 +80,24 @@ final class LmGlassSurface extends StatelessWidget {
     final highContrast = _highContrast(context);
     final decoration = _decorationFor(context, highContrast: highContrast);
     final content = Padding(padding: padding ?? EdgeInsets.zero, child: child);
+    final blurFilter = ImageFilter.blur(
+      sigmaX: theme.resolvedBlurSigma,
+      sigmaY: theme.resolvedBlurSigma,
+    );
+    final backdropGroup = BackdropGroup.of(context);
+    if (!theme.enabled || highContrast) {
+      return DecoratedBox(decoration: decoration, child: content);
+    }
     final inner = ClipRRect(
       borderRadius: radius,
       clipBehavior: Clip.antiAlias,
-      child: !theme.enabled || highContrast
-          ? DecoratedBox(decoration: decoration, child: content)
-          : BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: theme.resolvedBlurSigma,
-                sigmaY: theme.resolvedBlurSigma,
-              ),
+      child: backdropGroup == null
+          ? BackdropFilter(
+              filter: blurFilter,
+              child: DecoratedBox(decoration: decoration, child: content),
+            )
+          : BackdropFilter.grouped(
+              filter: blurFilter,
               child: DecoratedBox(decoration: decoration, child: content),
             ),
     );
@@ -165,6 +173,9 @@ final class LmGlassSurface extends StatelessWidget {
 
   double _tintOpacityFor(LmGlassSurfaceVariant variant) {
     final base = theme.tintOpacity;
+    if (!theme.enabled) {
+      return base.clamp(0.0, 1.0);
+    }
     return switch (variant) {
       LmGlassSurfaceVariant.bar => base * 0.82,
       LmGlassSurfaceVariant.sidebar => base * 0.88,

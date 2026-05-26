@@ -7,8 +7,6 @@ import 'domain.dart';
 import 'navigation_lab.dart';
 import 'screens.dart';
 import 'shell.dart';
-import 'web_smoke_bridge_stub.dart'
-    if (dart.library.js_interop) 'web_smoke_bridge_web.dart';
 
 final class FieldOrdersApp extends StatefulWidget {
   const FieldOrdersApp({this.initialLocation, super.key});
@@ -70,32 +68,20 @@ final class _FieldOrdersAppState extends State<FieldOrdersApp> {
       notFoundRoute: Lm.page<void>(
         path: '/404',
         transition: const LmTransition.cupertino(),
-        build: (context, params) => _withChrome(
-          title: 'Not found',
-          canPop: true,
-          child: NotFoundScreen(
-            title: 'No route for ${router.controller.state.location.canonical}',
-          ),
+        build: (context, params) => NotFoundScreen(
+          title: 'No route for ${router.controller.state.location.canonical}',
         ),
       ),
       routes: [
         Lm.page<void>(
           path: '/',
           transition: const LmTransition.none(),
-          build: (context, params) => _withChrome(
-            title: 'Field Orders',
-            canPop: false,
-            child: DashboardScreen(repository: repository),
-          ),
+          build: (context, params) => DashboardScreen(repository: repository),
         ),
         Lm.page<void>(
           path: '/orders',
           transition: const LmTransition.none(),
-          build: (context, params) => _withChrome(
-            title: 'Orders',
-            canPop: false,
-            child: OrdersScreen(repository: repository),
-          ),
+          build: (context, params) => OrdersScreen(repository: repository),
         ),
         Lm.page<OrderParams>(
           path: '/orders/:orderId',
@@ -106,13 +92,9 @@ final class _FieldOrdersAppState extends State<FieldOrdersApp> {
           ),
           decode: OrderParams.decode,
           buildPath: (params) => orderPath(params.orderId),
-          build: (context, params) => _withChrome(
-            title: 'Order detail',
-            canPop: true,
-            child: OrderDetailScreen(
-              repository: repository,
-              orderId: params!.orderId,
-            ),
+          build: (context, params) => OrderDetailScreen(
+            repository: repository,
+            orderId: params!.orderId,
           ),
         ),
         Lm.page<OrderItemParams>(
@@ -124,24 +106,16 @@ final class _FieldOrdersAppState extends State<FieldOrdersApp> {
           ),
           decode: OrderItemParams.decode,
           buildPath: (params) => orderItemPath(params.orderId, params.itemId),
-          build: (context, params) => _withChrome(
-            title: 'Line item',
-            canPop: true,
-            child: OrderItemScreen(
-              repository: repository,
-              orderId: params!.orderId,
-              itemId: params.itemId,
-            ),
+          build: (context, params) => OrderItemScreen(
+            repository: repository,
+            orderId: params!.orderId,
+            itemId: params.itemId,
           ),
         ),
         Lm.page<void>(
           path: '/lab',
           transition: const LmTransition.none(),
-          build: (context, params) => _withChrome(
-            title: 'Router Lab',
-            canPop: false,
-            child: const NavigationLabScreen(),
-          ),
+          build: (context, params) => const NavigationLabScreen(),
         ),
         Lm.page<void>(
           path: '/lab/reference',
@@ -149,11 +123,7 @@ final class _FieldOrdersAppState extends State<FieldOrdersApp> {
           chrome: const LmRouteChrome(
             tabBarVisibility: LmTabBarVisibility.hidden,
           ),
-          build: (context, params) => _withChrome(
-            title: 'Implementation Reference',
-            canPop: true,
-            child: const RouterReferenceScreen(),
-          ),
+          build: (context, params) => const RouterReferenceScreen(),
         ),
         Lm.page<void>(
           path: '/lab/heavy',
@@ -161,11 +131,7 @@ final class _FieldOrdersAppState extends State<FieldOrdersApp> {
           chrome: const LmRouteChrome(
             tabBarVisibility: LmTabBarVisibility.hidden,
           ),
-          build: (context, params) => _withChrome(
-            title: 'Heavy View',
-            canPop: true,
-            child: const LabHeavyViewScreen(),
-          ),
+          build: (context, params) => const LabHeavyViewScreen(),
         ),
         Lm.page<void>(
           path: '/lab/glass',
@@ -173,11 +139,7 @@ final class _FieldOrdersAppState extends State<FieldOrdersApp> {
           chrome: const LmRouteChrome(
             tabBarVisibility: LmTabBarVisibility.hidden,
           ),
-          build: (context, params) => _withChrome(
-            title: 'iOS 26 Glass Lab',
-            canPop: true,
-            child: const LabGlassViewScreen(),
-          ),
+          build: (context, params) => const LabGlassViewScreen(),
         ),
         _labTransitionRoute(
           path: '/lab/none',
@@ -248,16 +210,12 @@ final class _FieldOrdersAppState extends State<FieldOrdersApp> {
         Lm.page<void>(
           path: '/settings',
           transition: const LmTransition.none(),
-          build: (context, params) => _withChrome(
-            title: 'Settings',
-            canPop: false,
-            child: SettingsScreen(
-              session: session,
-              onSignOut: () {
-                session.signOut();
-                unawaited(router.go('/'));
-              },
-            ),
+          build: (context, params) => SettingsScreen(
+            session: session,
+            onSignOut: () {
+              session.signOut();
+              unawaited(router.go('/'));
+            },
           ),
         ),
         Lm.page<void>(
@@ -294,83 +252,8 @@ final class _FieldOrdersAppState extends State<FieldOrdersApp> {
             orderId: params!.orderId,
           ),
         ),
-        Lm.dialog<void>(
-          path: '/lab/modal/dialog',
-          build: (context, params) => const LabModalContent(
-            kind: 'dialog',
-            modalPath: '/lab/modal/dialog',
-          ),
-        ),
-        Lm.dialog<void>(
-          path: '/lab/glass/modal/dialog',
-          build: (context, params) => const LabModalContent(
-            kind: 'dialog',
-            modalPath: '/lab/glass/modal/dialog',
-          ),
-        ),
-        Lm.cupertinoDialog<void>(
-          path: '/lab/modal/cupertino-dialog',
-          build: (context, params) => const LabModalContent(
-            kind: 'cupertino-dialog',
-            modalPath: '/lab/modal/cupertino-dialog',
-          ),
-        ),
-        Lm.sheet<void>(
-          path: '/lab/modal/bottom-sheet',
-          build: (context, params) => const LabModalContent(
-            kind: 'bottom-sheet',
-            modalPath: '/lab/modal/bottom-sheet',
-          ),
-        ),
-        Lm.sheet<void>(
-          path: '/lab/glass/modal/bottom-sheet',
-          build: (context, params) => const LabModalContent(
-            kind: 'bottom-sheet',
-            modalPath: '/lab/glass/modal/bottom-sheet',
-          ),
-        ),
-        Lm.actionSheet<void>(
-          path: '/lab/modal/action-sheet',
-          build: (context, params) => const LabModalContent(
-            kind: 'action-sheet',
-            modalPath: '/lab/modal/action-sheet',
-          ),
-        ),
-        Lm.actionSheet<void>(
-          path: '/lab/glass/modal/action-sheet',
-          build: (context, params) => const LabModalContent(
-            kind: 'action-sheet',
-            modalPath: '/lab/glass/modal/action-sheet',
-          ),
-        ),
-        Lm.fullscreenDialog<void>(
-          path: '/lab/modal/fullscreen-dialog',
-          build: (context, params) => const LabModalContent(
-            kind: 'fullscreen-dialog',
-            modalPath: '/lab/modal/fullscreen-dialog',
-          ),
-        ),
-        Lm.fullscreenDialog<void>(
-          path: '/lab/glass/modal/fullscreen-dialog',
-          build: (context, params) => const LabModalContent(
-            kind: 'fullscreen-dialog',
-            modalPath: '/lab/glass/modal/fullscreen-dialog',
-          ),
-        ),
-        Lm.popover<void>(
-          path: '/lab/modal/popover',
-          build: (context, params) => const LabModalContent(
-            kind: 'popover',
-            modalPath: '/lab/modal/popover',
-          ),
-        ),
-        Lm.popover<void>(
-          path: '/lab/glass/modal/popover',
-          build: (context, params) => const LabModalContent(
-            kind: 'popover',
-            modalPath: '/lab/glass/modal/popover',
-          ),
-        ),
+        ..._labModalRoutes('/lab/modal'),
+        ..._labModalRoutes('/lab/glass/modal', glass: true),
       ],
     );
   }
@@ -385,24 +268,8 @@ final class _FieldOrdersAppState extends State<FieldOrdersApp> {
       path: path,
       transition: transition,
       chrome: const LmRouteChrome(tabBarVisibility: LmTabBarVisibility.hidden),
-      build: (context, params) => _withChrome(
-        title: title,
-        canPop: true,
-        child: LabTransitionDetailScreen(kind: kind, title: title),
-      ),
-    );
-  }
-
-  Widget _withChrome({
-    required String title,
-    required bool canPop,
-    required Widget child,
-  }) {
-    return Builder(
-      builder: (context) {
-        installWebSmokeBridge(context, router);
-        return child;
-      },
+      build: (context, params) =>
+          LabTransitionDetailScreen(kind: kind, title: title),
     );
   }
 
@@ -450,6 +317,40 @@ final class _FieldOrdersAppState extends State<FieldOrdersApp> {
       },
     );
   }
+}
+
+List<LmModalRouteDefinition<void>> _labModalRoutes(
+  String prefix, {
+  bool glass = false,
+}) {
+  Widget content(String kind) => LabModalContent(kind: kind, glass: glass);
+
+  return [
+    Lm.dialog<void>(
+      path: '$prefix/dialog',
+      build: (context, params) => content('dialog'),
+    ),
+    Lm.cupertinoDialog<void>(
+      path: '$prefix/cupertino-dialog',
+      build: (context, params) => content('cupertino-dialog'),
+    ),
+    Lm.sheet<void>(
+      path: '$prefix/bottom-sheet',
+      build: (context, params) => content('bottom-sheet'),
+    ),
+    Lm.actionSheet<void>(
+      path: '$prefix/action-sheet',
+      build: (context, params) => content('action-sheet'),
+    ),
+    Lm.fullscreenDialog<void>(
+      path: '$prefix/fullscreen-dialog',
+      build: (context, params) => content('fullscreen-dialog'),
+    ),
+    Lm.popover<void>(
+      path: '$prefix/popover',
+      build: (context, params) => content('popover'),
+    ),
+  ];
 }
 
 String orderPath(int orderId) => '/orders/$orderId';

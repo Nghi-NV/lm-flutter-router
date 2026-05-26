@@ -316,7 +316,8 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Route actions'), findsOneWidget);
-    expect(find.byType(LmGlassSurface), findsAtLeastNWidgets(8));
+    expect(find.byType(LmGlassSurface), findsAtLeastNWidgets(2));
+    expect(find.byType(BackdropGroup), findsOneWidget);
     expect(find.byType(CupertinoTabBar), findsNothing);
   });
 
@@ -492,8 +493,6 @@ void main() {
         .map((surface) => surface.variant)
         .toSet();
     expect(variants, contains(LmGlassSurfaceVariant.panel));
-    expect(variants, contains(LmGlassSurfaceVariant.popover));
-    expect(variants, contains(LmGlassSurfaceVariant.actionSheet));
     expect(variants, contains(LmGlassSurfaceVariant.bar));
 
     await tester.scrollUntilVisible(

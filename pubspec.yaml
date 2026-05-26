@@ -1,6 +1,7 @@
 name: lm_flutter_router
 description: "Typed adaptive Flutter routing with custom RouterDelegate navigation, guards, deep links, iOS-style transitions, and split-view projection."
 version: 0.0.1
+repository: https://github.com/Nghi-NV/lm-flutter-router
 topics:
   - router
   - navigation

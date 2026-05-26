@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lm_flutter_router/lm_flutter_router.dart';
 
@@ -603,32 +604,129 @@ final class LabGlassViewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
-    return Stack(
+    final performanceLayout = _dispatchUsesPerformanceLayout(context);
+    return BackdropGroup(
+      child: Stack(
+        children: [
+          const Positioned.fill(
+            child: RepaintBoundary(child: _DispatchMapScene()),
+          ),
+          Positioned.fill(
+            child: RepaintBoundary(
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(18, 74, 18, 142 + bottomInset),
+                children: performanceLayout
+                    ? [const _DispatchCommandSheet()]
+                    : [
+                        const _DispatchHero(),
+                        const SizedBox(height: 12),
+                        const _DispatchRouteCard(),
+                        const SizedBox(height: 12),
+                        const _DispatchStatusPanel(),
+                        const SizedBox(height: 12),
+                        const _DispatchMetricGrid(),
+                        const SizedBox(height: 12),
+                        const _DispatchFilterBar(),
+                        const SizedBox(height: 12),
+                        _GlassModalButtons(),
+                      ],
+              ),
+            ),
+          ),
+          const Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: RepaintBoundary(child: _DispatchBottomBar()),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+bool _dispatchUsesPerformanceLayout(BuildContext context) {
+  return defaultTargetPlatform == TargetPlatform.android;
+}
+
+LmGlassThemeData _dispatchGlassTheme(
+  BuildContext context, {
+  required LmGlassIntensity intensity,
+  required double blurSigma,
+  required double tintOpacity,
+  required double borderOpacity,
+  required double highlightOpacity,
+}) {
+  return LmGlassThemeData.liquid(
+    enabled: !_dispatchUsesPerformanceLayout(context),
+    intensity: intensity,
+    blurSigma: blurSigma,
+    tintOpacity: tintOpacity,
+    borderOpacity: borderOpacity,
+    highlightOpacity: highlightOpacity,
+  );
+}
+
+final class _DispatchCommandSheet extends StatelessWidget {
+  const _DispatchCommandSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return LmGlassSurface(
+      variant: LmGlassSurfaceVariant.panel,
+      theme: _dispatchGlassTheme(
+        context,
+        intensity: LmGlassIntensity.prominent,
+        blurSigma: 8,
+        tintOpacity: 0.48,
+        borderOpacity: 0.20,
+        highlightOpacity: 0.12,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _DispatchHeroText(),
+            const SizedBox(height: 16),
+            const _LiteRouteTile(),
+            const SizedBox(height: 16),
+            const _LiteStatusPanel(),
+            const SizedBox(height: 14),
+            const _LiteMetricGrid(),
+            const SizedBox(height: 14),
+            const _LiteFilterBar(),
+            const SizedBox(height: 14),
+            _GlassModalButtons(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+final class _DispatchHeroText extends StatelessWidget {
+  const _DispatchHeroText();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Positioned.fill(child: _DispatchMapScene()),
-        Positioned.fill(
-          child: ListView(
-            padding: EdgeInsets.fromLTRB(18, 74, 18, 142 + bottomInset),
-            children: [
-              const _DispatchHero(),
-              const SizedBox(height: 12),
-              const _DispatchRouteCard(),
-              const SizedBox(height: 12),
-              const _DispatchStatusPanel(),
-              const SizedBox(height: 12),
-              const _DispatchMetricGrid(),
-              const SizedBox(height: 12),
-              const _DispatchFilterBar(),
-              const SizedBox(height: 12),
-              _GlassModalButtons(),
-            ],
+        Text(
+          'Dispatch Command',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w900,
+            color: const Color(0xff0f172a),
           ),
         ),
-        const Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: _DispatchBottomBar(),
+        const SizedBox(height: 6),
+        Text(
+          'Live field routing with glass controls over a real operations map.',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: const Color(0xff334155),
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ],
     );
@@ -675,72 +773,172 @@ final class _GlassModalButtons extends StatelessWidget {
   }
 }
 
-final class _DispatchMapScene extends StatelessWidget {
+final class _DispatchMapScene extends StatefulWidget {
   const _DispatchMapScene();
 
   @override
+  State<_DispatchMapScene> createState() => _DispatchMapSceneState();
+}
+
+final class _DispatchMapSceneState extends State<_DispatchMapScene> {
+  ui.Image? _mapImage;
+  ui.Image? _blurredMapImage;
+  Size? _imageSize;
+  bool _rendering = false;
+
+  @override
+  void dispose() {
+    _mapImage?.dispose();
+    _blurredMapImage?.dispose();
+    super.dispose();
+  }
+
+  void _ensureMapImage(Size size) {
+    if (size.isEmpty || _rendering || _imageSize == size) {
+      return;
+    }
+    _rendering = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        _rendering = false;
+        return;
+      }
+      _renderMapImage(size);
+    });
+  }
+
+  Future<void> _renderMapImage(Size size) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    const _DispatchMapPainter().paint(canvas, size);
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(size.width.ceil(), size.height.ceil());
+    picture.dispose();
+    final blurredImage = await _renderBlurredMapImage(image, size);
+    if (!mounted) {
+      image.dispose();
+      blurredImage.dispose();
+      _rendering = false;
+      return;
+    }
+    setState(() {
+      _mapImage?.dispose();
+      _blurredMapImage?.dispose();
+      _mapImage = image;
+      _blurredMapImage = blurredImage;
+      _imageSize = size;
+      _rendering = false;
+    });
+  }
+
+  Future<ui.Image> _renderBlurredMapImage(ui.Image image, Size size) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final bounds = Offset.zero & size;
+    canvas.saveLayer(
+      bounds,
+      Paint()..imageFilter = ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+    );
+    paintImage(canvas: canvas, rect: bounds, image: image, fit: BoxFit.fill);
+    canvas.restore();
+    final picture = recorder.endRecording();
+    final blurredImage = await picture.toImage(
+      size.width.ceil(),
+      size.height.ceil(),
+    );
+    picture.dispose();
+    return blurredImage;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xffdbeafe), Color(0xfff8fafc), Color(0xffd1fae5)],
-        ),
-      ),
-      child: Stack(
-        children: [
-          Positioned.fill(child: CustomPaint(painter: _DispatchMapPainter())),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.white.withValues(alpha: 0.64),
-                    Colors.white.withValues(alpha: 0.38),
-                    Colors.white.withValues(alpha: 0.24),
-                  ],
-                  stops: const [0, 0.42, 1],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = constraints.biggest;
+        _ensureMapImage(size);
+        final image = _imageSize == size ? _mapImage : null;
+        final blurredImage = _imageSize == size ? _blurredMapImage : null;
+        final performanceLayout = _dispatchUsesPerformanceLayout(context);
+        return DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xffbfdbfe), Color(0xffe0f2fe), Color(0xffbbf7d0)],
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: image == null
+                    ? CustomPaint(painter: _DispatchMapPainter())
+                    : RawImage(image: image, fit: BoxFit.fill),
+              ),
+              if (performanceLayout && blurredImage != null)
+                Positioned.fill(
+                  child: Opacity(
+                    opacity: 0.46,
+                    child: RawImage(image: blurredImage, fit: BoxFit.fill),
+                  ),
+                ),
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: performanceLayout
+                          ? [
+                              const Color(0xffdbeafe).withValues(alpha: 0.03),
+                              const Color(0xff0f172a).withValues(alpha: 0.055),
+                              const Color(0xff1e3a8a).withValues(alpha: 0.035),
+                            ]
+                          : [
+                              Colors.white.withValues(alpha: 0.12),
+                              Colors.white.withValues(alpha: 0.04),
+                              const Color(0xffdbeafe).withValues(alpha: 0.10),
+                            ],
+                      stops: const [0, 0.42, 1],
+                    ),
+                  ),
                 ),
               ),
-            ),
+              Positioned(
+                left: 22,
+                top: 252,
+                child: _MapMarker(
+                  color: const Color(0xff2563eb),
+                  offset: const Offset(0, 0),
+                ),
+              ),
+              Positioned(
+                right: 36,
+                top: 356,
+                child: _MapMarker(
+                  color: const Color(0xff059669),
+                  offset: const Offset(0, 0),
+                ),
+              ),
+              Positioned(
+                left: 78,
+                bottom: 330,
+                child: _MapMarker(
+                  color: const Color(0xfff97316),
+                  offset: const Offset(0, 0),
+                ),
+              ),
+              Positioned(
+                right: 78,
+                bottom: 288,
+                child: _MapMarker(
+                  color: const Color(0xffdb2777),
+                  offset: const Offset(0, 0),
+                ),
+              ),
+            ],
           ),
-          Positioned(
-            left: 22,
-            top: 252,
-            child: _MapMarker(
-              color: const Color(0xff2563eb),
-              offset: const Offset(0, 0),
-            ),
-          ),
-          Positioned(
-            right: 36,
-            top: 356,
-            child: _MapMarker(
-              color: const Color(0xff059669),
-              offset: const Offset(0, 0),
-            ),
-          ),
-          Positioned(
-            left: 78,
-            bottom: 330,
-            child: _MapMarker(
-              color: const Color(0xfff97316),
-              offset: const Offset(0, 0),
-            ),
-          ),
-          Positioned(
-            right: 78,
-            bottom: 288,
-            child: _MapMarker(
-              color: const Color(0xffdb2777),
-              offset: const Offset(0, 0),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -752,33 +950,256 @@ final class _DispatchHero extends StatelessWidget {
   Widget build(BuildContext context) {
     return LmGlassSurface(
       variant: LmGlassSurfaceVariant.popover,
-      theme: const LmGlassThemeData.liquid(
+      theme: _dispatchGlassTheme(
+        context,
         intensity: LmGlassIntensity.subtle,
-        tintOpacity: 0.28,
-        borderOpacity: 0.06,
+        blurSigma: 8,
+        tintOpacity: 0.42,
+        borderOpacity: 0.18,
+        highlightOpacity: 0.16,
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Dispatch Command',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: const Color(0xff0f172a),
-              ),
+        child: const _DispatchHeroText(),
+      ),
+    );
+  }
+}
+
+final class _LiteRouteTile extends StatelessWidget {
+  const _LiteRouteTile();
+
+  @override
+  Widget build(BuildContext context) {
+    return const _LiteSurface(
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: Color(0xff1d4ed8),
+            foregroundColor: Colors.white,
+            child: Text('42'),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Minh Tran #1042',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xff0f172a),
+                  ),
+                ),
+                SizedBox(height: 3),
+                Text(
+                  'Powerline inspection - 2.4 km away',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-            const SizedBox(height: 6),
-            Text(
-              'Live field routing with glass controls over a real operations map.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: const Color(0xff334155),
-                fontWeight: FontWeight.w700,
+          ),
+          Icon(Icons.chevron_right, color: Color(0xff334155)),
+        ],
+      ),
+    );
+  }
+}
+
+final class _LiteStatusPanel extends StatelessWidget {
+  const _LiteStatusPanel();
+
+  @override
+  Widget build(BuildContext context) {
+    return _LiteSurface(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.route, color: Color(0xff2563eb)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'North route is ahead of schedule',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xff0f172a),
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '4 crews are moving through priority stops while controls stay readable above the map.',
+          ),
+          const SizedBox(height: 12),
+          const Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _LiteChip(label: 'Live route'),
+              _LiteChip(label: 'ETA 18m'),
+              _LiteChip(label: '4 crews'),
+              _LiteChip(label: 'Priority'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+final class _LiteMetricGrid extends StatelessWidget {
+  const _LiteMetricGrid();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        Expanded(
+          child: _LiteMetricCard(
+            value: '18m',
+            label: 'next arrival',
+            icon: Icons.timer_outlined,
+          ),
         ),
+        SizedBox(width: 12),
+        Expanded(
+          child: _LiteMetricCard(
+            value: '94%',
+            label: 'on-time',
+            icon: Icons.verified_outlined,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+final class _LiteMetricCard extends StatelessWidget {
+  const _LiteMetricCard({
+    required this.value,
+    required this.label,
+    required this.icon,
+  });
+
+  final String value;
+  final String label;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return _LiteSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: const Color(0xff1d4ed8)),
+          const SizedBox(height: 10),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w900,
+              color: const Color(0xff0f172a),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(label, style: const TextStyle(color: Color(0xff334155))),
+        ],
+      ),
+    );
+  }
+}
+
+final class _LiteFilterBar extends StatelessWidget {
+  const _LiteFilterBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: [
+        _LiteChip(label: 'All stops'),
+        _LiteChip(label: 'Exceptions'),
+        _LiteChip(label: 'Crew 2'),
+        _LiteChip(label: 'North zone'),
+      ],
+    );
+  }
+}
+
+final class _LiteChip extends StatelessWidget {
+  const _LiteChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return _LiteSurface(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      radius: 18,
+      child: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+    );
+  }
+}
+
+final class _LiteSurface extends StatelessWidget {
+  const _LiteSurface({
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+    this.radius = 24,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final performanceLayout = _dispatchUsesPerformanceLayout(context);
+    final useShadow = !performanceLayout;
+    final colorOpacity = performanceLayout ? 0.88 : 0.58;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xfff9fcff).withValues(alpha: colorOpacity),
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(
+          color: (performanceLayout ? Colors.white : Colors.white).withValues(
+            alpha: performanceLayout ? 0.90 : 0.24,
+          ),
+        ),
+        backgroundBlendMode: BlendMode.srcOver,
+        boxShadow: useShadow
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.045),
+                  blurRadius: 12,
+                  offset: const Offset(0, 8),
+                ),
+              ]
+            : null,
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(radius),
+          gradient: performanceLayout
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.white.withValues(alpha: 0.86),
+                    const Color(0xffdbeafe).withValues(alpha: 0.18),
+                    Colors.white.withValues(alpha: 0.46),
+                  ],
+                  stops: const [0, 0.56, 1],
+                )
+              : null,
+        ),
+        child: Padding(padding: padding, child: child),
       ),
     );
   }
@@ -791,10 +1212,13 @@ final class _DispatchStatusPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return LmGlassSurface(
       variant: LmGlassSurfaceVariant.panel,
-      theme: const LmGlassThemeData.liquid(
+      theme: _dispatchGlassTheme(
+        context,
         intensity: LmGlassIntensity.prominent,
-        tintOpacity: 0.34,
-        borderOpacity: 0.08,
+        blurSigma: 8,
+        tintOpacity: 0.46,
+        borderOpacity: 0.18,
+        highlightOpacity: 0.14,
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -880,10 +1304,13 @@ final class _DispatchMetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return LmGlassSurface(
       variant: LmGlassSurfaceVariant.popover,
-      theme: const LmGlassThemeData.liquid(
+      theme: _dispatchGlassTheme(
+        context,
         intensity: LmGlassIntensity.regular,
-        tintOpacity: 0.30,
-        borderOpacity: 0.08,
+        blurSigma: 6,
+        tintOpacity: 0.40,
+        borderOpacity: 0.16,
+        highlightOpacity: 0.14,
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -933,10 +1360,13 @@ final class _DispatchRouteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return LmGlassSurface(
       variant: LmGlassSurfaceVariant.actionSheet,
-      theme: const LmGlassThemeData.liquid(
+      theme: _dispatchGlassTheme(
+        context,
         intensity: LmGlassIntensity.regular,
-        tintOpacity: 0.32,
-        borderOpacity: 0.08,
+        blurSigma: 8,
+        tintOpacity: 0.42,
+        borderOpacity: 0.16,
+        highlightOpacity: 0.14,
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -984,10 +1414,13 @@ final class _DispatchBottomBar extends StatelessWidget {
     return LmGlassSurface(
       variant: LmGlassSurfaceVariant.bar,
       borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-      theme: const LmGlassThemeData.liquid(
+      theme: _dispatchGlassTheme(
+        context,
         intensity: LmGlassIntensity.prominent,
-        tintOpacity: 0.30,
-        borderOpacity: 0.08,
+        blurSigma: 8,
+        tintOpacity: 0.44,
+        borderOpacity: 0.16,
+        highlightOpacity: 0.12,
       ),
       child: SafeArea(
         top: false,
@@ -1026,12 +1459,26 @@ final class _GlassChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LmGlassSurface(
-      variant: LmGlassSurfaceVariant.bar,
-      theme: const LmGlassThemeData.liquid(
-        intensity: LmGlassIntensity.subtle,
-        tintOpacity: 0.26,
-        borderOpacity: 0.10,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.44),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: 0.18),
+            Colors.white.withValues(alpha: 0.02),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1049,19 +1496,22 @@ final class _MapMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final useShadow = !_dispatchUsesPerformanceLayout(context);
     return Transform.translate(
       offset: offset,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.92),
           shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.16),
-              blurRadius: 12,
-              spreadRadius: 1,
-            ),
-          ],
+          boxShadow: useShadow
+              ? [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.16),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : null,
         ),
         child: SizedBox.square(
           dimension: 18,
@@ -1123,14 +1573,14 @@ final class _DispatchMapPainter extends CustomPainter {
       ..close();
     canvas.drawPath(
       river,
-      Paint()..color = const Color(0xffbfdbfe).withValues(alpha: 0.24),
+      Paint()..color = const Color(0xff60a5fa).withValues(alpha: 0.38),
     );
   }
 
   void _paintBlocks(Canvas canvas, Size size) {
-    final blockPaint = Paint()..color = Colors.white.withValues(alpha: 0.36);
+    final blockPaint = Paint()..color = Colors.white.withValues(alpha: 0.54);
     final greenPaint = Paint()
-      ..color = const Color(0xff86efac).withValues(alpha: 0.16);
+      ..color = const Color(0xff22c55e).withValues(alpha: 0.24);
     const blockWidth = 88.0;
     const blockHeight = 54.0;
     for (var row = 0; row < size.height / 96; row += 1) {
@@ -1148,13 +1598,13 @@ final class _DispatchMapPainter extends CustomPainter {
 
   void _paintRoads(Canvas canvas, Size size) {
     final major = Paint()
-      ..color = Colors.white.withValues(alpha: 0.42)
-      ..strokeWidth = 16
+      ..color = Colors.white.withValues(alpha: 0.68)
+      ..strokeWidth = 18
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
     final minor = Paint()
-      ..color = const Color(0xffcbd5e1).withValues(alpha: 0.25)
-      ..strokeWidth = 2
+      ..color = const Color(0xff64748b).withValues(alpha: 0.30)
+      ..strokeWidth = 2.4
       ..style = PaintingStyle.stroke;
 
     for (var y = 96.0; y < size.height; y += 128) {
@@ -1198,7 +1648,7 @@ final class _DispatchMapPainter extends CustomPainter {
     canvas.drawPath(
       route,
       Paint()
-        ..color = const Color(0xff60a5fa).withValues(alpha: 0.16)
+        ..color = const Color(0xff93c5fd).withValues(alpha: 0.30)
         ..strokeWidth = 14
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round,
@@ -1206,8 +1656,8 @@ final class _DispatchMapPainter extends CustomPainter {
     canvas.drawPath(
       route,
       Paint()
-        ..color = const Color(0xff2563eb).withValues(alpha: 0.70)
-        ..strokeWidth = 4
+        ..color = const Color(0xff2563eb).withValues(alpha: 0.88)
+        ..strokeWidth = 4.5
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round,
     );
@@ -1220,7 +1670,7 @@ final class _DispatchMapPainter extends CustomPainter {
         width: 170,
         height: 92,
       ),
-      Paint()..color = const Color(0xfff59e0b).withValues(alpha: 0.10),
+      Paint()..color = const Color(0xfff59e0b).withValues(alpha: 0.18),
     );
     canvas.drawOval(
       Rect.fromCenter(
@@ -1228,10 +1678,10 @@ final class _DispatchMapPainter extends CustomPainter {
         width: 210,
         height: 118,
       ),
-      Paint()..color = const Color(0xffe11d48).withValues(alpha: 0.08),
+      Paint()..color = const Color(0xffe11d48).withValues(alpha: 0.13),
     );
     final dotPaint = Paint()
-      ..color = const Color(0xff0f172a).withValues(alpha: 0.04);
+      ..color = const Color(0xff0f172a).withValues(alpha: 0.07);
     for (var index = 0; index < 12; index += 1) {
       final center = Offset(
         (index * 73 % size.width).toDouble(),
@@ -1692,20 +2142,15 @@ String _trackTitle(int index) {
 }
 
 final class LabModalContent extends StatelessWidget {
-  const LabModalContent({
-    required this.kind,
-    required this.modalPath,
-    super.key,
-  });
+  const LabModalContent({required this.kind, this.glass = false, super.key});
 
   final String kind;
-  final String modalPath;
+  final bool glass;
 
   @override
   Widget build(BuildContext context) {
     final router = context.lm;
-    final isGlass = modalPath.startsWith('/lab/glass/modal');
-    final title = isGlass
+    final title = glass
         ? _glassTitleFromKind(kind)
         : '${_titleFromKind(kind)} presentation';
 
@@ -1725,7 +2170,7 @@ final class LabModalContent extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                isGlass
+                glass
                     ? 'Choose a route-level action while the live dispatch map '
                           'stays visible behind the glass surface.'
                     : 'Route-owned action sheets dim the background and use '
@@ -1759,7 +2204,7 @@ final class LabModalContent extends StatelessWidget {
                   Text(title, style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 8),
                   Text(
-                    isGlass
+                    glass
                         ? 'Review the next service stop, customer note, and '
                               'arrival window without leaving dispatch.'
                         : 'iOS 15 style sheet page with a top gap, rounded '
@@ -1797,19 +2242,13 @@ final class LabModalContent extends StatelessWidget {
         body: _CupertinoModalPanel(
           kind: kind,
           title: title,
-          modalPath: modalPath,
-          isGlass: isGlass,
+          isGlass: glass,
           centered: false,
         ),
       );
     }
 
-    return _CupertinoModalPanel(
-      kind: kind,
-      title: title,
-      modalPath: modalPath,
-      isGlass: isGlass,
-    );
+    return _CupertinoModalPanel(kind: kind, title: title, isGlass: glass);
   }
 }
 
@@ -1817,14 +2256,12 @@ final class _CupertinoModalPanel extends StatelessWidget {
   const _CupertinoModalPanel({
     required this.kind,
     required this.title,
-    required this.modalPath,
     required this.isGlass,
     this.centered = true,
   });
 
   final String kind;
   final String title;
-  final String modalPath;
   final bool isGlass;
   final bool centered;
 
